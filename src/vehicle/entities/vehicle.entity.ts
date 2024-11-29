@@ -23,7 +23,6 @@ export class Vehicle {
   get id() {
     return this.props.id;
   }
-  q;
 
   get plate() {
     return this.props.plate;
