@@ -1,4 +1,4 @@
-import { randomUUID } from "crypto";
+import { randomUUID } from 'crypto';
 
 interface VehicleProps {
   id?: string;
@@ -11,41 +11,41 @@ interface VehicleProps {
 }
 
 export class Vehicle {
-    constructor(private props: VehicleProps) {
-      this.props = props;
+  constructor(private props: VehicleProps) {
+    this.props = props;
 
-      const idIsEmpty = !this.props.id;
-      if(idIsEmpty) {
-        this.props.id = randomUUID();
-      }
+    const idIsEmpty = !this.props.id;
+    if (idIsEmpty) {
+      this.props.id = randomUUID();
     }
-    
-    get id() {
-      return this.props.id;
-    }q
+  }
 
-    get plate() {
-      return this.props.plate;
-    }
+  get id() {
+    return this.props.id;
+  }
+  q;
 
-    get chassis() {
-      return this.props.chassis;
-    }
+  get plate() {
+    return this.props.plate;
+  }
 
-    get renavam() {
-      return this.props.renavam;
-    }
+  get chassis() {
+    return this.props.chassis;
+  }
 
-    get model() {
-      return this.props.model;
-    }
+  get renavam() {
+    return this.props.renavam;
+  }
 
-    get brand() {
-      return this.props.brand;
-    }
+  get model() {
+    return this.props.model;
+  }
 
-    get year() {
-      return this.props.year;
-    }
+  get brand() {
+    return this.props.brand;
+  }
 
+  get year() {
+    return this.props.year;
+  }
 }
