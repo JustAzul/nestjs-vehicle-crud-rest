@@ -7,9 +7,11 @@ import {
   Param,
   Body,
   NotImplementedException,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { VehicleDataDto } from './dto/vehicle-data.dto';
+import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 
 @Controller('vehicle')
 export class VehicleController {
@@ -27,13 +29,16 @@ export class VehicleController {
 
   // POST /vehicle - Create a new vehicle
   @Post()
-  createVehicle(@Body() vehicleData: VehicleDataDto) {
+  createVehicle(@Body(ValidationPipe) vehicleData: VehicleDataDto) {
     throw new NotImplementedException('Method not implemented');
   }
 
   // PUT /vehicle/:id - Update a specific vehicle by ID
   @Put(':id')
-  updateVehicle(@Param('id') id: UUID, @Body() updatedVehicleData: any) {
+  updateVehicle(
+    @Param('id') id: UUID,
+    @Body(ValidationPipe) updatedVehicleData: UpdatedVehicleDataDto,
+  ) {
     throw new NotImplementedException('Method not implemented');
   }
 
