@@ -9,6 +9,7 @@ import {
   NotImplementedException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
+import { VehicleDataDto } from './dto/vehicle-data.dto';
 
 @Controller('vehicle')
 export class VehicleController {
@@ -26,7 +27,7 @@ export class VehicleController {
 
   // POST /vehicle - Create a new vehicle
   @Post()
-  createVehicle(@Body() vehicleData: any) {
+  createVehicle(@Body() vehicleData: VehicleDataDto) {
     throw new NotImplementedException('Method not implemented');
   }
 
