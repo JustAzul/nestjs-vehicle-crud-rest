@@ -25,12 +25,16 @@ export class InMemoryRepository implements IVehicleRepository {
 
   // Update a vehicle by ID
   update(id: UUID, updatedData: Partial<Omit<Vehicle, 'id'>>): Vehicle | null {
-    const existingVehicle = this.vehicles.get(id);
+    const existingVehicle = this.findById(id);
     if (!existingVehicle) return null;
 
     const props: VehicleProps = {
-      ...existingVehicle,
-      ...updatedData,
+      brand: updatedData.brand || existingVehicle.brand,
+      chassis: updatedData.chassis || existingVehicle.chassis,
+      model: updatedData.model || existingVehicle.model,
+      plate: updatedData.plate || existingVehicle.plate,
+      renavam: updatedData.renavam || existingVehicle.renavam,
+      year: updatedData.year || existingVehicle.year,
     };
 
     const updatedVehicle = new Vehicle(props);
