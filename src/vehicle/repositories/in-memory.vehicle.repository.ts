@@ -1,4 +1,4 @@
-import { randomUUID, UUID } from 'crypto';
+import { UUID } from 'crypto';
 import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
 import { IVehicleRepository } from './interfaces/vehicle.repository';
 
@@ -7,6 +7,15 @@ export class InMemoryRepository implements IVehicleRepository {
 
   // Create a new vehicle
   create(vehicle: Omit<Vehicle, 'id'>): Vehicle {
+    const duplicateField = UniqueFieldValidator.checkDuplicate(
+      this.vehicles,
+      vehicle,
+    );
+
+    if (duplicateField) {
+      throw new Error(`Vehicle with the same ${duplicateField} already exists`);
+    }
+
     const newVehicle: Vehicle = new Vehicle(vehicle);
     const id = newVehicle.id;
     this.vehicles.set(id, newVehicle);
@@ -37,6 +46,16 @@ export class InMemoryRepository implements IVehicleRepository {
       year: updatedData.year || existingVehicle.year,
     };
 
+    const duplicateField = UniqueFieldValidator.checkDuplicate(
+      this.vehicles,
+      props,
+      id,
+    );
+
+    if (duplicateField) {
+      throw new Error(`Vehicle with the same ${duplicateField} already exists`);
+    }
+
     const updatedVehicle = new Vehicle(props);
     this.vehicles.set(id, updatedVehicle);
     return updatedVehicle;
@@ -45,5 +64,26 @@ export class InMemoryRepository implements IVehicleRepository {
   // Delete a vehicle by ID
   delete(id: UUID): boolean {
     return this.vehicles.delete(id);
+  }
+}
+
+class UniqueFieldValidator {
+  static checkDuplicate(
+    vehicles: Map<UUID, Vehicle>,
+    vehicle: Partial<Vehicle>,
+    uniqueFields: (keyof Vehicle)[],
+    excludeId?: UUID,
+  ): string | null {
+    for (const [id, existingVehicle] of vehicles.entries()) {
+      if (id === excludeId) continue; // Skip the vehicle being updated
+
+      for (const field of uniqueFields) {
+        if (vehicle[field] && vehicle[field] === existingVehicle[field]) {
+          return field; // Return the first duplicate field found
+        }
+      }
+    }
+
+    return null; // No duplicates found
   }
 }
