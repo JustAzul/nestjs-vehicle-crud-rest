@@ -8,6 +8,7 @@ import {
   Body,
   NotImplementedException,
 } from '@nestjs/common';
+import { UUID } from 'crypto';
 
 @Controller('vehicle')
 export class VehicleController {
@@ -19,7 +20,7 @@ export class VehicleController {
 
   // GET /vehicle/:id - Get a specific vehicle by ID
   @Get(':id')
-  getVehicleById(@Param('id') id: string) {
+  getVehicleById(@Param('id') id: UUID) {
     throw new NotImplementedException('Method not implemented');
   }
 
@@ -31,13 +32,13 @@ export class VehicleController {
 
   // PUT /vehicle/:id - Update a specific vehicle by ID
   @Put(':id')
-  updateVehicle(@Param('id') id: string, @Body() updatedVehicleData: any) {
+  updateVehicle(@Param('id') id: UUID, @Body() updatedVehicleData: any) {
     throw new NotImplementedException('Method not implemented');
   }
 
   // DELETE /vehicle/:id - Delete a specific vehicle by ID
   @Delete(':id')
-  deleteVehicle(@Param('id') id: string) {
+  deleteVehicle(@Param('id') id: UUID) {
     throw new NotImplementedException('Method not implemented');
   }
 }
