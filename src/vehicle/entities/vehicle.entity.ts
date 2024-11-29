@@ -1,12 +1,12 @@
 import { randomUUID } from 'crypto';
 
 interface VehicleProps {
-  id?: string;
-  plate: string;
-  chassis: string;
-  renavam: string;
-  model: string;
   brand: string;
+  chassis: string;
+  id?: string;
+  model: string;
+  plate: string;
+  renavam: string;
   year: number;
 }
 
