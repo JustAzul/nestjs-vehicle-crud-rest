@@ -1,5 +1,5 @@
 import { randomUUID, UUID } from 'crypto';
-import { Vehicle } from '../entities/vehicle.entity';
+import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
 import { IVehicleRepository } from './interfaces/vehicle.repository';
 
 export class InMemoryRepository implements IVehicleRepository {
@@ -28,11 +28,12 @@ export class InMemoryRepository implements IVehicleRepository {
     const existingVehicle = this.vehicles.get(id);
     if (!existingVehicle) return null;
 
-    const updatedVehicle = new Vehicle({
-      id,
+    const props: VehicleProps = {
       ...existingVehicle,
       ...updatedData,
-    });
+    };
+
+    const updatedVehicle = new Vehicle(props);
     this.vehicles.set(id, updatedVehicle);
     return updatedVehicle;
   }

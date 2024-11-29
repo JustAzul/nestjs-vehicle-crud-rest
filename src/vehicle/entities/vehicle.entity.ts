@@ -1,6 +1,6 @@
 import { randomUUID, UUID } from 'crypto';
 
-interface VehicleProps {
+export interface VehicleProps {
   brand: string;
   chassis: string;
   id?: UUID;
