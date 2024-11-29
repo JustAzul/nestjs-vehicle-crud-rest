@@ -1,9 +1,9 @@
-import { randomUUID } from 'crypto';
+import { randomUUID, UUID } from 'crypto';
 
 interface VehicleProps {
   brand: string;
   chassis: string;
-  id?: string;
+  id?: UUID;
   model: string;
   plate: string;
   renavam: string;
