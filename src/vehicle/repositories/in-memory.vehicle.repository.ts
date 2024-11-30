@@ -1,6 +1,10 @@
 import { UUID } from 'crypto';
 import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
 import { IVehicleRepository } from './interfaces/vehicle.repository';
+import {
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {
   private readonly fieldValidator: UniqueFieldValidator<Vehicle>;
@@ -22,38 +26,64 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
   ];
 
   // Create a new vehicle
-  async create(vehicle: Omit<Vehicle, 'id'>): Promise<Vehicle> {
+  async create({
+    entity,
+  }: Parameters<IVehicleRepository[`create`]>[0]): Promise<Vehicle> {
     const duplicateField = this.fieldValidator.checkDuplicate({
       entities: this.vehicles,
-      entity: vehicle,
+      entity,
     });
 
     if (duplicateField) {
       throw new Error(`Vehicle with the same ${duplicateField} already exists`);
     }
 
-    const newVehicle: Vehicle = new Vehicle(vehicle);
+    const newVehicle: Vehicle = new Vehicle(entity);
     const id = newVehicle.id;
     this.vehicles.set(id, newVehicle);
     return newVehicle;
   }
 
-  // Retrieve all vehicles
-  async findAll(): Promise<Vehicle[]> {
-    return Array.from(this.vehicles.values());
+  // Retrieve all vehicles with pagination
+  async findAll({
+    page,
+    pageSize,
+  }: Parameters<IVehicleRepository[`findAll`]>[0]): Promise<Vehicle[]> {
+    if ((page && page < 1) || (pageSize && pageSize < 1)) {
+      throw new InternalServerErrorException(
+        'Page and pageSize must be positive integers',
+      );
+    }
+
+    const allVehicles = Array.from(this.vehicles.values());
+    const totalItems = allVehicles.length;
+    const maxPage = Math.ceil(totalItems / pageSize);
+
+    if (page > maxPage) {
+      throw new BadRequestException(
+        `Page ${page} exceeds maximum page number ${maxPage}`,
+      );
+    }
+
+    const startIndex = (page - 1) * pageSize;
+    const endIndex = startIndex + pageSize;
+
+    return allVehicles.slice(startIndex, endIndex);
   }
 
   // Retrieve a vehicle by ID
-  async findById(id: UUID): Promise<Vehicle | null> {
+  async findById({
+    id,
+  }: Parameters<IVehicleRepository[`findById`]>[0]): Promise<Vehicle | null> {
     return this.vehicles.get(id) || null;
   }
 
   // Update a vehicle by ID
-  async update(
-    id: UUID,
-    updatedData: Partial<Omit<Vehicle, 'id'>>,
-  ): Promise<Vehicle | null> {
-    const existingVehicle = await this.findById(id);
+  async update({
+    id,
+    updatedData,
+  }: Parameters<IVehicleRepository[`update`]>[0]): Promise<Vehicle | null> {
+    const existingVehicle = await this.findById({ id });
     if (!existingVehicle) return null;
 
     const props: VehicleProps = {
@@ -81,7 +111,9 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
   }
 
   // Delete a vehicle by ID
-  async delete(id: UUID): Promise<boolean> {
+  async delete({
+    id,
+  }: Parameters<IVehicleRepository[`delete`]>[0]): Promise<boolean> {
     return this.vehicles.delete(id);
   }
 }
