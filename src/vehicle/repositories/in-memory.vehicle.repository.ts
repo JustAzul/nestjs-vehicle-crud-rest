@@ -5,12 +5,14 @@ import { IVehicleRepository } from './interfaces/vehicle.repository';
 export class InMemoryVehicleRepository implements IVehicleRepository {
   private readonly fieldValidator: UniqueFieldValidator<Vehicle>;
 
-  constructor(private readonly vehicles: Map<UUID, Vehicle>) {
+  constructor(private readonly vehicles?: Map<UUID, Vehicle>) {
     this.fieldValidator = new UniqueFieldValidator<Vehicle>(
       InMemoryVehicleRepository.uniqueFields,
     );
 
-    this.vehicles = new Map();
+    if (!vehicles) {
+      this.vehicles = new Map();
+    }
   }
 
   static readonly uniqueFields: (keyof Vehicle)[] = [
