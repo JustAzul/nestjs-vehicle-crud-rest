@@ -2,15 +2,29 @@ import { UUID } from 'crypto';
 import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
 import { IVehicleRepository } from './interfaces/vehicle.repository';
 
-export class InMemoryRepository implements IVehicleRepository {
-  private readonly vehicles: Map<UUID, Vehicle> = new Map();
+export class InMemoryVehicleRepository implements IVehicleRepository {
+  private readonly fieldValidator: UniqueFieldValidator<Vehicle>;
+
+  constructor(private readonly vehicles: Map<UUID, Vehicle>) {
+    this.fieldValidator = new UniqueFieldValidator<Vehicle>(
+      InMemoryVehicleRepository.uniqueFields,
+    );
+
+    this.vehicles = new Map();
+  }
+
+  static readonly uniqueFields: (keyof Vehicle)[] = [
+    'chassis',
+    'plate',
+    'renavam',
+  ];
 
   // Create a new vehicle
-  create(vehicle: Omit<Vehicle, 'id'>): Vehicle {
-    const duplicateField = UniqueFieldValidator.checkDuplicate(
-      this.vehicles,
-      vehicle,
-    );
+  async create(vehicle: Omit<Vehicle, 'id'>): Promise<Vehicle> {
+    const duplicateField = this.fieldValidator.checkDuplicate({
+      entities: this.vehicles,
+      entity: vehicle,
+    });
 
     if (duplicateField) {
       throw new Error(`Vehicle with the same ${duplicateField} already exists`);
@@ -23,18 +37,21 @@ export class InMemoryRepository implements IVehicleRepository {
   }
 
   // Retrieve all vehicles
-  findAll(): Vehicle[] {
+  async findAll(): Promise<Vehicle[]> {
     return Array.from(this.vehicles.values());
   }
 
   // Retrieve a vehicle by ID
-  findById(id: UUID): Vehicle | null {
+  async findById(id: UUID): Promise<Vehicle | null> {
     return this.vehicles.get(id) || null;
   }
 
   // Update a vehicle by ID
-  update(id: UUID, updatedData: Partial<Omit<Vehicle, 'id'>>): Vehicle | null {
-    const existingVehicle = this.findById(id);
+  async update(
+    id: UUID,
+    updatedData: Partial<Omit<Vehicle, 'id'>>,
+  ): Promise<Vehicle | null> {
+    const existingVehicle = await this.findById(id);
     if (!existingVehicle) return null;
 
     const props: VehicleProps = {
@@ -46,11 +63,11 @@ export class InMemoryRepository implements IVehicleRepository {
       year: updatedData.year || existingVehicle.year,
     };
 
-    const duplicateField = UniqueFieldValidator.checkDuplicate(
-      this.vehicles,
-      props,
-      id,
-    );
+    const duplicateField = this.fieldValidator.checkDuplicate({
+      entities: this.vehicles,
+      entity: props,
+      excludeId: id,
+    });
 
     if (duplicateField) {
       throw new Error(`Vehicle with the same ${duplicateField} already exists`);
@@ -62,23 +79,28 @@ export class InMemoryRepository implements IVehicleRepository {
   }
 
   // Delete a vehicle by ID
-  delete(id: UUID): boolean {
+  async delete(id: UUID): Promise<boolean> {
     return this.vehicles.delete(id);
   }
 }
 
-class UniqueFieldValidator {
-  static checkDuplicate(
-    vehicles: Map<UUID, Vehicle>,
-    vehicle: Partial<Vehicle>,
-    uniqueFields: (keyof Vehicle)[],
-    excludeId?: UUID,
-  ): string | null {
-    for (const [id, existingVehicle] of vehicles.entries()) {
-      if (id === excludeId) continue; // Skip the vehicle being updated
+class UniqueFieldValidator<T extends Vehicle> {
+  constructor(private readonly uniqueFields: (keyof T)[]) {}
 
-      for (const field of uniqueFields) {
-        if (vehicle[field] && vehicle[field] === existingVehicle[field]) {
+  checkDuplicate({
+    entity,
+    entities,
+    excludeId,
+  }: {
+    entities: Map<UUID, T>;
+    entity: Partial<T>;
+    excludeId?: UUID;
+  }): keyof T | null {
+    for (const [id, existingEntity] of entities.entries()) {
+      if (id === excludeId) continue; // Skip the entity being updated
+
+      for (const field of this.uniqueFields) {
+        if (entity[field] && entity[field] === existingEntity[field]) {
           return field; // Return the first duplicate field found
         }
       }
