@@ -11,7 +11,7 @@ export interface VehicleProps {
 }
 
 export class Vehicle {
-  constructor(private props: VehicleProps) {
+  constructor(private readonly props: VehicleProps) {
     this.props = props;
 
     const idIsEmpty = !this.props.id;
