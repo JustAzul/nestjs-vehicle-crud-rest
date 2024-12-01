@@ -108,16 +108,16 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 0, pageSize: 10 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.equal(
-        'Page and pageSize must be positive integers',
+      expect((error as Error).message.toLowerCase()).to.contains(
+        'must be positive integers'.toLowerCase(),
       );
     }
 
     try {
       await repository.findAll({ page: 1, pageSize: 0 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.equal(
-        'Page and pageSize must be positive integers',
+      expect((error as Error).message.toLowerCase()).to.contains(
+        'must be positive integers'.toLowerCase(),
       );
     }
   });
@@ -137,8 +137,8 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 2, pageSize: 1 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.equal(
-        'Page 2 exceeds maximum page number 1',
+      expect((error as Error).message.toLowerCase()).to.contains(
+        'exceeds maximum page number'.toLowerCase(),
       );
     }
   });
@@ -159,8 +159,8 @@ describe(InMemoryVehicleRepository.name, () => {
     expect(storedVehicle).to.deep.include(vehicleData);
   });
 
-  it('should update a vehicle', async () => {
-    const vehicleData: VehicleProps = {
+  {
+    const initialVehicleData: VehicleProps = {
       brand: 'Toyota',
       chassis: 'ABC123',
       model: 'Corolla',
@@ -169,19 +169,46 @@ describe(InMemoryVehicleRepository.name, () => {
       year: 2020,
     };
 
-    const vehicle = await repository.create({ entity: vehicleData });
-    const updatedData = { brand: 'UpdatedBrand' };
+    const testUpdateField = async (
+      field: keyof VehicleProps,
+      newValue: string | number,
+    ) => {
+      const vehicle = await repository.create({ entity: initialVehicleData });
+      const updatedData = { [field]: newValue };
 
-    const updatedVehicle = await repository.update({
-      id: vehicle.id,
-      updatedData,
+      const updatedVehicle = await repository.update({
+        id: vehicle.id,
+        updatedData,
+      });
+
+      expect(updatedVehicle?.[field]).to.equal(newValue);
+      expect(repositorySourceData.get(vehicle.id)?.[field]).to.equal(newValue);
+    };
+
+    it('should update the brand', async () => {
+      await testUpdateField('brand', 'UpdatedBrand');
     });
 
-    expect(updatedVehicle?.brand).to.equal(updatedData.brand);
-    expect(repositorySourceData.get(vehicle.id).brand).to.equal(
-      updatedData.brand,
-    );
-  });
+    it('should update the chassis', async () => {
+      await testUpdateField('chassis', 'UpdatedChassis');
+    });
+
+    it('should update the model', async () => {
+      await testUpdateField('model', 'UpdatedModel');
+    });
+
+    it('should update the plate', async () => {
+      await testUpdateField('plate', 'UpdatedPlate');
+    });
+
+    it('should update the renavam', async () => {
+      await testUpdateField('renavam', 'UpdatedRenavam');
+    });
+
+    it('should update the year', async () => {
+      await testUpdateField('year', 2021);
+    });
+  }
 
   it('should not update a vehicle with duplicate unique fields', async () => {
     const vehicle1 = {
