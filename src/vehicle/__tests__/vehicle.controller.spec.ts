@@ -100,5 +100,29 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.metadata.page).to.equal(String(page));
       expect(body.metadata.totalPages).to.equal(2);
     });
+
+    it('should return the second page of vehicles', async () => {
+      const page = 2;
+      const pageSize = 2;
+
+      const response = await request(app.getHttpServer())
+        .get('/vehicle')
+        .query({ page, pageSize })
+        .expect(200);
+
+      const body = response.body as ListVehicleData;
+
+      expect(body.data).to.be.an('array');
+      expect(body.data.length).to.equal(1);
+
+      // @ts-expect-error - data is private
+      expect(body.data.map(({ props }) => props)).to.deep.include.members([
+        vehicles[2],
+      ]);
+
+      expect(body.metadata).to.be.an('object');
+      expect(body.metadata.page).to.equal(String(page));
+      expect(body.metadata.totalPages).to.equal(2);
+    });
   });
 });
