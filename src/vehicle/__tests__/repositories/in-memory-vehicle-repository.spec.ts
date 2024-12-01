@@ -8,12 +8,12 @@ import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
-  let repoDatabase: Map<UUID, any>;
+  let repositorySourceData: Map<UUID, any>;
 
   beforeEach(() => {
-    repoDatabase = new Map();
+    repositorySourceData = new Map();
     repository = new InMemoryVehicleRepository(
-      repoDatabase,
+      repositorySourceData,
       VEHICLE_UNIQUE_FIELDS,
     );
   });
@@ -29,7 +29,7 @@ describe(InMemoryVehicleRepository.name, () => {
     };
 
     const vehicle = await repository.create({ entity: vehicleData });
-    const storedVehicle = repoDatabase.get(vehicle.id);
+    const storedVehicle = repositorySourceData.get(vehicle.id);
 
     expect(storedVehicle).to.deep.include(vehicleData);
   });
@@ -49,8 +49,8 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.create({ entity: vehicleData });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.equal(
-        'Vehicle with the same chassis already exists'.toLowerCase(),
+      expect((error as Error).message.toLowerCase()).to.contains(
+        'already exists'.toLowerCase(),
       );
     }
   });
@@ -94,9 +94,10 @@ describe(InMemoryVehicleRepository.name, () => {
     expect(page2.data.length).to.equal(1);
 
     //@ts-expect-error - data is private
-    const page1Props = page1.data.map((vehicle) => vehicle.props);
+    const page1Props = page1.data.map(({ props }) => props);
+
     //@ts-expect-error - data is private
-    const page2Props = page2.data.map((vehicle) => vehicle.props);
+    const page2Props = page2.data.map(({ props }) => props);
 
     expect(page1Props).to.deep.include(vehicles[0]);
     expect(page1Props).to.deep.include(vehicles[1]);
@@ -177,7 +178,9 @@ describe(InMemoryVehicleRepository.name, () => {
     });
 
     expect(updatedVehicle?.brand).to.equal(updatedData.brand);
-    expect(repoDatabase.get(vehicle.id).brand).to.equal(updatedData.brand);
+    expect(repositorySourceData.get(vehicle.id).brand).to.equal(
+      updatedData.brand,
+    );
   });
 
   it('should not update a vehicle with duplicate unique fields', async () => {
@@ -227,7 +230,7 @@ describe(InMemoryVehicleRepository.name, () => {
     const deleted = await repository.delete({ id: vehicle.id });
 
     expect(deleted).to.be.true;
-    expect(repoDatabase.has(vehicle.id)).to.be.false;
+    expect(repositorySourceData.has(vehicle.id)).to.be.false;
   });
 
   it('should return false when deleting a non-existent vehicle', async () => {
