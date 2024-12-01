@@ -4,7 +4,10 @@ import { Vehicle, VehicleProps } from 'src/vehicle/entities/vehicle.entity';
 import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.vehicle.repository';
 import { randomUUID, UUID } from 'crypto';
 import { IVehicleRepository } from 'src/vehicle/repositories/interfaces/vehicle.repository';
-import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
+import {
+  ERROR_MESSAGES,
+  VEHICLE_UNIQUE_FIELDS,
+} from '@src/vehicle/constants/module.contants';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
@@ -49,8 +52,8 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.create({ entity: vehicleData });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.contains(
-        'already exists'.toLowerCase(),
+      expect((error as Error).message).to.contains(
+        ERROR_MESSAGES.DUPLICATE_VEHICLE('chassis'),
       );
     }
   });
@@ -108,16 +111,16 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 0, pageSize: 10 });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.contains(
-        'must be positive integers'.toLowerCase(),
+      expect((error as Error).message).to.contains(
+        ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
       );
     }
 
     try {
       await repository.findAll({ page: 1, pageSize: 0 });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.contains(
-        'must be positive integers'.toLowerCase(),
+      expect((error as Error).message).to.contains(
+        ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
       );
     }
   });
@@ -137,8 +140,8 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 2, pageSize: 1 });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.contains(
-        'exceeds maximum page number'.toLowerCase(),
+      expect((error as Error).message).to.contains(
+        ERROR_MESSAGES.PAGE_EXCEEDS_MAX(2, 1),
       );
     }
   });
@@ -231,14 +234,16 @@ describe(InMemoryVehicleRepository.name, () => {
     const createdVehicle1 = await repository.create({ entity: vehicle1 });
     const createdVehicle2 = await repository.create({ entity: vehicle2 });
 
+    const field: keyof VehicleProps = 'chassis';
+
     try {
       await repository.update({
         id: createdVehicle2.id,
-        updatedData: { chassis: vehicle1.chassis },
+        updatedData: { chassis: vehicle1[field] },
       });
     } catch (error: unknown) {
-      expect((error as Error).message.toLowerCase()).to.contains(
-        'already exists'.toLowerCase(),
+      expect((error as Error).message).to.contains(
+        ERROR_MESSAGES.DUPLICATE_VEHICLE(field),
       );
     }
   });

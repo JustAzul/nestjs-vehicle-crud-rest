@@ -4,6 +4,7 @@ import {
   IVehicleRepository,
   PaginatedVehicleResult,
 } from './interfaces/vehicle.repository';
+import { ERROR_MESSAGES } from '../constants/module.contants';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {
   constructor(
@@ -22,7 +23,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     });
 
     if (duplicateField) {
-      throw new Error(`Vehicle with the same ${duplicateField} already exists`);
+      throw new Error(ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField));
     }
 
     const newVehicle: Vehicle = new Vehicle(entity);
@@ -39,7 +40,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     IVehicleRepository[`findAll`]
   >[0]): Promise<PaginatedVehicleResult> {
     if ((page && page < 1) || (pageSize && pageSize < 1)) {
-      throw new Error('Page and pageSize must be positive integers');
+      throw new Error(ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE());
     }
 
     const allVehicles = Array.from(this.vehicles.values());
@@ -47,7 +48,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     const maxPage = Math.ceil(totalItems / pageSize);
 
     if (page > maxPage) {
-      throw new Error(`Page ${page} exceeds maximum page number ${maxPage}`);
+      throw new Error(ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage));
     }
 
     const startIndex = (page - 1) * pageSize;
@@ -94,7 +95,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     });
 
     if (duplicateField) {
-      throw new Error(`Vehicle with the same ${duplicateField} already exists`);
+      throw new Error(ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField));
     }
 
     const updatedVehicle = new Vehicle(props);
