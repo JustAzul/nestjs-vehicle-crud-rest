@@ -8,27 +8,44 @@ import {
   Body,
   NotImplementedException,
   ValidationPipe,
+  Query,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { VehicleDataDto } from './dto/vehicle-data.dto';
 import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
+import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
+import { ListVehicleData, VehicleData } from './dto/list-vehicle.dto';
 
 @ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
 @Controller('vehicle')
 export class VehicleController {
-  // GET /vehicle - List all vehicles
+  constructor(private readonly vehicleRepository: IVehicleRepository) {}
+
+  // GET /vehicle - List all vehicles with pagination
   @Get()
   @ApiOperation({
     summary: 'Get all vehicles',
-    description: 'Retrieve a list of all vehicles.',
+    description: 'Retrieve a paginated list of all vehicles.',
   })
   @ApiResponse({
     status: 200,
     description: 'List of vehicles retrieved successfully.',
+    type: ListVehicleData,
   })
-  getAllVehicles() {
-    throw new NotImplementedException('Method not implemented');
+  async getAllVehicles(
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ): Promise<ListVehicleData> {
+    const { data, metadata } = await this.vehicleRepository.findAll({
+      page: page || 1,
+      pageSize: pageSize || 10,
+    });
+
+    return {
+      data,
+      metadata,
+    };
   }
 
   // GET /vehicle/:id - Get a specific vehicle by ID
