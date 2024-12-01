@@ -10,7 +10,11 @@ import { InMemoryVehicleRepository } from './repositories/in-memory.vehicle.repo
     {
       provide: IVehicleRepository,
       useFactory: () => {
-        return new InMemoryVehicleRepository();
+        return new InMemoryVehicleRepository(new Map(), [
+          'chassis',
+          'plate',
+          'renavam',
+        ]);
       },
     },
   ],

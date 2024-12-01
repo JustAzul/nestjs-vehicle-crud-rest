@@ -10,30 +10,18 @@ import {
 } from '@nestjs/common';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {
-  private readonly fieldValidator: UniqueFieldValidator<Vehicle>;
-
-  constructor(private readonly vehicles?: Map<UUID, Vehicle>) {
-    this.fieldValidator = new UniqueFieldValidator<Vehicle>(
-      InMemoryVehicleRepository.uniqueFields,
-    );
-
-    if (!vehicles) {
-      this.vehicles = new Map();
-    }
+  constructor(
+    private readonly vehicles: Map<UUID, Vehicle>,
+    private readonly uniqueFields: (keyof Vehicle)[],
+  ) {
+    this.vehicles = vehicles;
   }
-
-  static readonly uniqueFields: (keyof Vehicle)[] = [
-    'chassis',
-    'plate',
-    'renavam',
-  ];
 
   // Create a new vehicle
   async create({
     entity,
   }: Parameters<IVehicleRepository[`create`]>[0]): Promise<Vehicle> {
-    const duplicateField = this.fieldValidator.checkDuplicate({
-      entities: this.vehicles,
+    const duplicateField = this.checkDuplicate({
       entity,
     });
 
@@ -108,8 +96,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
       year: updatedData.year || existingVehicle.year,
     };
 
-    const duplicateField = this.fieldValidator.checkDuplicate({
-      entities: this.vehicles,
+    const duplicateField = this.checkDuplicate({
       entity: props,
       excludeId: id,
     });
@@ -129,21 +116,15 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
   }: Parameters<IVehicleRepository[`delete`]>[0]): Promise<boolean> {
     return this.vehicles.delete(id);
   }
-}
-
-class UniqueFieldValidator<T extends Vehicle> {
-  constructor(private readonly uniqueFields: (keyof T)[]) {}
 
   checkDuplicate({
     entity,
-    entities,
     excludeId,
   }: {
-    entities: Map<UUID, T>;
-    entity: Partial<T>;
+    entity: Partial<Vehicle>;
     excludeId?: UUID;
-  }): keyof T | null {
-    for (const [id, existingEntity] of entities.entries()) {
+  }): keyof Vehicle | null {
+    for (const [id, existingEntity] of this.vehicles.entries()) {
       if (id === excludeId) continue; // Skip the entity being updated
 
       for (const field of this.uniqueFields) {
