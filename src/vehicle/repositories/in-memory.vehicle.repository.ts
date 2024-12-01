@@ -1,6 +1,9 @@
 import { UUID } from 'crypto';
 import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
-import { IVehicleRepository } from './interfaces/vehicle.repository';
+import {
+  IVehicleRepository,
+  PaginatedVehicleResult,
+} from './interfaces/vehicle.repository';
 import {
   BadRequestException,
   InternalServerErrorException,
@@ -48,7 +51,9 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
   async findAll({
     page,
     pageSize,
-  }: Parameters<IVehicleRepository[`findAll`]>[0]): Promise<Vehicle[]> {
+  }: Parameters<
+    IVehicleRepository[`findAll`]
+  >[0]): Promise<PaginatedVehicleResult> {
     if ((page && page < 1) || (pageSize && pageSize < 1)) {
       throw new InternalServerErrorException(
         'Page and pageSize must be positive integers',
@@ -68,7 +73,15 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     const startIndex = (page - 1) * pageSize;
     const endIndex = startIndex + pageSize;
 
-    return allVehicles.slice(startIndex, endIndex);
+    const result = allVehicles.slice(startIndex, endIndex);
+
+    return {
+      data: result,
+      metadata: {
+        page,
+        totalPages: maxPage,
+      },
+    };
   }
 
   // Retrieve a vehicle by ID

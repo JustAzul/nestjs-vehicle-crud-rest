@@ -1,6 +1,14 @@
 import { UUID } from 'crypto';
 import { Vehicle } from '../../entities/vehicle.entity';
 
+export interface PaginatedVehicleResult {
+  metadata: {
+    page: number;
+    totalPages: number;
+  };
+  data: Vehicle[];
+}
+
 export abstract class IVehicleRepository {
   // Create a new vehicle
   abstract create(params: { entity: Omit<Vehicle, 'id'> }): Promise<Vehicle>;
@@ -9,7 +17,7 @@ export abstract class IVehicleRepository {
   abstract findAll(params: {
     page?: number;
     pageSize?: number;
-  }): Promise<Vehicle[]>;
+  }): Promise<PaginatedVehicleResult>;
 
   // Retrieve a vehicle by ID
   abstract findById(params: { id: UUID }): Promise<Vehicle | null>;
