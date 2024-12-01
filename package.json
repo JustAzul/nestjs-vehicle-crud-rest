@@ -30,6 +30,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/mapped-types": "^2.0.6",
     "@nestjs/schematics": "^10.0.0",
+    "@nestjs/testing": "^10.4.12",
     "@types/chai": "^4.3.20",
     "@types/expect": "^24.3.2",
     "@types/express": "^5.0.0",
