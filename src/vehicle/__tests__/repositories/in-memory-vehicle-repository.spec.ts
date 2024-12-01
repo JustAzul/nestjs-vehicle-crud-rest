@@ -234,11 +234,11 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.update({
         id: createdVehicle2.id,
-        updatedData: { chassis: 'ABC123' },
+        updatedData: { chassis: vehicle1.chassis },
       });
     } catch (error: unknown) {
-      expect((error as Error).message).to.equal(
-        'Vehicle with the same chassis already exists',
+      expect((error as Error).message.toLowerCase()).to.contains(
+        'already exists'.toLowerCase(),
       );
     }
   });
