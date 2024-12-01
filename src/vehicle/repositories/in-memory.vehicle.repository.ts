@@ -4,10 +4,6 @@ import {
   IVehicleRepository,
   PaginatedVehicleResult,
 } from './interfaces/vehicle.repository';
-import {
-  BadRequestException,
-  InternalServerErrorException,
-} from '@nestjs/common';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {
   constructor(
@@ -43,9 +39,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     IVehicleRepository[`findAll`]
   >[0]): Promise<PaginatedVehicleResult> {
     if ((page && page < 1) || (pageSize && pageSize < 1)) {
-      throw new InternalServerErrorException(
-        'Page and pageSize must be positive integers',
-      );
+      throw new Error('Page and pageSize must be positive integers');
     }
 
     const allVehicles = Array.from(this.vehicles.values());
@@ -53,9 +47,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     const maxPage = Math.ceil(totalItems / pageSize);
 
     if (page > maxPage) {
-      throw new BadRequestException(
-        `Page ${page} exceeds maximum page number ${maxPage}`,
-      );
+      throw new Error(`Page ${page} exceeds maximum page number ${maxPage}`);
     }
 
     const startIndex = (page - 1) * pageSize;
