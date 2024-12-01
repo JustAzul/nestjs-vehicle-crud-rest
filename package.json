@@ -13,10 +13,7 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "ts-mocha -p tsconfig.json src/**/*.spec.ts",
-    "test:watch": "mocha --require ts-node/register --watch 'test/**/*.spec.ts'",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/mocha --timeout 10000 --require ts-node/register 'test/**/*.spec.ts'",
-    "test:e2e": "mocha --require ts-node/register 'test/**/*.e2e-spec.ts'"
+    "test": "npm run build && mocha 'dist/**/*.spec.js'"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -33,7 +30,7 @@
     "@nestjs/cli": "^10.0.0",
     "@nestjs/mapped-types": "^2.0.6",
     "@nestjs/schematics": "^10.0.0",
-    "@types/chai": "^5.0.1",
+    "@types/chai": "^4.3.20",
     "@types/expect": "^24.3.2",
     "@types/express": "^5.0.0",
     "@types/mocha": "^10.0.10",
@@ -50,11 +47,11 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-sort-keys": "^2.3.5",
     "eslint-plugin-typescript-sort-keys": "^3.3.0",
+    "mocha": "^10.8.2",
     "prettier": "^3.0.0",
     "source-map-support": "^0.5.21",
     "supertest": "^7.0.0",
     "ts-loader": "^9.4.3",
-    "ts-mocha": "^10.0.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.3"
