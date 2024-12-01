@@ -1,6 +1,6 @@
 import { expect } from 'chai';
 
-import { VehicleProps } from 'src/vehicle/entities/vehicle.entity';
+import { Vehicle, VehicleProps } from 'src/vehicle/entities/vehicle.entity';
 import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.vehicle.repository';
 import { randomUUID, UUID } from 'crypto';
 import { IVehicleRepository } from 'src/vehicle/repositories/interfaces/vehicle.repository';
@@ -8,7 +8,7 @@ import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
-  let repositorySourceData: Map<UUID, any>;
+  let repositorySourceData: Map<UUID, Vehicle>;
 
   beforeEach(() => {
     repositorySourceData = new Map();
