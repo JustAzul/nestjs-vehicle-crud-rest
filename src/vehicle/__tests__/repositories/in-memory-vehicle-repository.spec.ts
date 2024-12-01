@@ -4,6 +4,7 @@ import { VehicleProps } from 'src/vehicle/entities/vehicle.entity';
 import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.vehicle.repository';
 import { randomUUID, UUID } from 'crypto';
 import { IVehicleRepository } from 'src/vehicle/repositories/interfaces/vehicle.repository';
+import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
@@ -11,7 +12,10 @@ describe(InMemoryVehicleRepository.name, () => {
 
   beforeEach(() => {
     repoDatabase = new Map();
-    repository = new InMemoryVehicleRepository(repoDatabase);
+    repository = new InMemoryVehicleRepository(
+      repoDatabase,
+      VEHICLE_UNIQUE_FIELDS,
+    );
   });
 
   it('should create a new vehicle', async () => {
