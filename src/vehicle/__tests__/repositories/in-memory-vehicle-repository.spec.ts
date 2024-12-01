@@ -52,7 +52,7 @@ describe(InMemoryVehicleRepository.name, () => {
   });
 
   it('should retrieve all vehicles with pagination', async () => {
-    const vehicles = [
+    const vehicles: VehicleProps[] = [
       {
         brand: 'Toyota',
         chassis: '123',
@@ -86,10 +86,17 @@ describe(InMemoryVehicleRepository.name, () => {
     const page1 = await repository.findAll({ page: 1, pageSize: 2 });
     const page2 = await repository.findAll({ page: 2, pageSize: 2 });
 
-    expect(page1.length).to.equal(2);
-    expect(page2.length).to.equal(1);
-    expect(page1).to.deep.include.members([vehicles[0], vehicles[1]]);
-    expect(page2).to.deep.include(vehicles[2]);
+    expect(page1.data.length).to.equal(2);
+    expect(page2.data.length).to.equal(1);
+
+    //@ts-expect-error - data is private
+    const page1Props = page1.data.map((vehicle) => vehicle.props);
+    //@ts-expect-error - data is private
+    const page2Props = page2.data.map((vehicle) => vehicle.props);
+
+    expect(page1Props).to.deep.include(vehicles[0]);
+    expect(page1Props).to.deep.include(vehicles[1]);
+    expect(page2Props).to.deep.include(vehicles[2]);
   });
 
   it('should throw an error if page or pageSize is less than 1', async () => {
