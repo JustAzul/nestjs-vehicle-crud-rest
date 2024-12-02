@@ -31,7 +31,7 @@ $ npm install
 
 ### Usando Docker Compose
 
-1. Construir e iniciar a aplicação:
+1. Inicie a aplicação:
 
    ```bash
    $ docker compose up
@@ -40,6 +40,7 @@ $ npm install
    O servidor estará acessível em: [http://localhost:3000](http://localhost:3000).
 
 2. Executar testes:
+
    ```bash
    $ docker compose run app sh -c "npm run test"
    ```
@@ -48,24 +49,23 @@ $ npm install
 
 ## Documentação da API
 
-A documentação da API está disponível no Swagger. Acesse:
+A documentação está disponível no Swagger. Acesse:
 
 ```
 http://localhost:3000/api
 ```
 
-### Screenshot do Swagger
+### Screenshot
 
-![image](https://github.com/user-attachments/assets/9f518e88-de3d-4fc3-880e-525be57b7bdc)
+![Swagger Screenshot](https://github.com/user-attachments/assets/9f518e88-de3d-4fc3-880e-525be57b7bdc)
 
 ---
 
 ## Testes
 
-Execute os testes unitários e de ponta a ponta:
+Execute os testes:
 
 ```bash
-# Executar testes unitários/ponta a ponta
 $ docker compose run app sh -c "npm run test"
 ```
 
@@ -73,38 +73,35 @@ $ docker compose run app sh -c "npm run test"
 
 ## Estrutura do Projeto
 
-Aqui está uma visão geral das pastas e arquivos principais:
-
 ```plaintext
 src
 ├── vehicle
 │   ├── __tests__            # Testes unitários e de ponta a ponta
-│   ├── dto                 # Data Transfer Objects
-│   ├── entities            # Definição da entidade Veículo
-│   ├── repositories        # Interfaces e implementações do repositório
-│   ├── vehicle.controller.ts # Endpoints da API para veículos
-│   ├── vehicle.module.ts    # Definição do módulo Veículo
+│   ├── dto                  # Data Transfer Objects
+│   ├── entities             # Definição da entidade Veículo
+│   ├── repositories         # Interfaces e implementações do repositório
+│   ├── vehicle.controller.ts # Endpoints da API
+│   ├── vehicle.module.ts    # Módulo Veículo
 │   └── vehicle.mapper.ts    # Utilitário para mapear entidades para DTOs
-├── app.module.ts            # Módulo raiz da aplicação
-├── app.error.ts             # Tratamento centralizado de erros
-└── main.ts                  # Ponto de entrada da aplicação
+├── app.module.ts            # Módulo raiz
+├── app.error.ts             # Tratamento de erros
+└── main.ts                  # Ponto de entrada
 ```
 
 ---
 
 ## Deploy
 
-Para implantar sua aplicação:
-
 1. Construa a imagem Docker:
 
    ```bash
-   docker compose build
+   $ docker compose build
    ```
 
 2. Inicie a aplicação:
+
    ```bash
-   docker compose up
+   $ docker compose up
    ```
 
 ---
