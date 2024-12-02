@@ -20,7 +20,7 @@ Uma API REST CRUD desenvolvida com o [framework NestJS](https://nestjs.com/), pr
 Clone o repositório e instale as dependências:
 
 ```bash
-$ git clone <repository-url>
+$ git clone https://github.com/JustAzul/nestjs-vehicle-crud-rest.git
 $ cd nestjs-vehicle-crud-rest
 $ npm install
 ```
