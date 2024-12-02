@@ -76,7 +76,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(storedVehicle).to.deep.contains(vehicleData);
     });
 
-    it.skip('should return an error when vehicle already exists', async () => {
+    it('should return an error when vehicle already exists', async () => {
       const vehicleData: VehicleProps = {
         brand: 'Toyota',
         chassis: '123',
@@ -91,7 +91,15 @@ describe(`${VehicleController.name} (E2E)`, () => {
       for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
         const response = await request(app.getHttpServer())
           .post('/vehicle')
-          .send(vehicleData);
+          .send({
+            brand: 'Honda',
+            chassis: 'DEF456',
+            model: 'Civic',
+            plate: 'XYZ5678',
+            renavam: '123456',
+            year: 2021,
+            [uniqueField]: vehicleData[uniqueField],
+          });
 
         expect(response.status).to.equal(HttpStatus.CONFLICT);
 
