@@ -99,11 +99,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.data).to.be.an('array');
       expect(body.data.length).to.equal(2);
 
-      // @ts-expect-error - data is private
-      expect(body.data.map(({ props }) => props)).to.deep.include.members([
-        vehicles[0],
-        vehicles[1],
-      ]);
+      expect(body.data).to.deep.include.members([vehicles[0], vehicles[1]]);
 
       expect(body.metadata).to.be.an('object');
       expect(body.metadata.page).to.equal(String(page));
@@ -124,10 +120,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.data).to.be.an('array');
       expect(body.data.length).to.equal(1);
 
-      // @ts-expect-error - data is private
-      expect(body.data.map(({ props }) => props)).to.deep.include.members([
-        vehicles[2],
-      ]);
+      expect(body.data).to.deep.include.members([vehicles[2]]);
 
       expect(body.metadata).to.be.an('object');
       expect(body.metadata.page).to.equal(String(page));
@@ -147,11 +140,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.data).to.be.an('array');
       expect(body.data.length).to.equal(itemsPerPage);
 
-      // @ts-expect-error - data is private
-      expect(body.data.map(({ props }) => props)).to.deep.include.members([
-        vehicles[0],
-        vehicles[1],
-      ]);
+      expect(body.data).to.deep.include.members([vehicles[0], vehicles[1]]);
 
       expect(body.metadata).to.be.an('object');
       expect(body.metadata.page).to.equal(1);

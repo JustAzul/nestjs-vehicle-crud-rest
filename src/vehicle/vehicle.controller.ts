@@ -51,7 +51,7 @@ export class VehicleController {
       });
 
       return {
-        data,
+        data: VehicleMapper.toDTOList(data),
         metadata,
       };
     } catch (e: unknown) {
