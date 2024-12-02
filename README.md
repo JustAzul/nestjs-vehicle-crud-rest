@@ -26,6 +26,8 @@ src
 ## Funcionalidades
 
 - **Operações CRUD**: Gerenciamento completo de veículos com funcionalidades de Criar, Ler, Atualizar e Deletar.
+- **Paginção**: Suporte para paginação em listagens, com parâmetros de página e tamanho configuráveis.
+- **Validação de Campos Únicos**: Verificação e tratamento de duplicação para campos como `chassis`, `placa` e `renavam`.
 - **Documentação com Swagger**: Documentação interativa da API disponível em `/api`.
 - **Banco de Dados em Memória**: Configuração simplificada com repositório em memória.
 - **Validação e Tratamento de Erros**: Validação de entrada com `class-validator` e tratamento de erros consistente.
