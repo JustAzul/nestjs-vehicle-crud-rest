@@ -280,6 +280,26 @@ describe(InMemoryVehicleRepository.name, () => {
       });
     });
 
+    it('should throw an error when updating a non-existent vehicle', async () => {
+      const nonExistentId = randomUUID();
+
+      try {
+        await repository.update({
+          id: nonExistentId,
+          updatedData: { brand: 'UpdatedBrand' },
+        });
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(AppError);
+
+        const appError = error as AppError;
+        expect(appError.id).to.equal(ErrorCodes.VEHICLE_NOT_FOUND);
+
+        expect(appError.message).to.contains(
+          ERROR_MESSAGES.VEHICLE_NOT_FOUND(nonExistentId),
+        );
+      }
+    });
+
     describe('should not update a vehicle with duplicate unique fields', () => {
       const vehicle1 = {
         brand: 'Toyota',
