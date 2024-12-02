@@ -178,17 +178,22 @@ describe(`${VehicleController.name} (E2E)`, () => {
         },
       });
 
+      const vehicle2 = await repository.create({
+        entity: {
+          brand: 'Honda',
+          chassis: 'DEF456',
+          model: 'Civic',
+          plate: 'XYZ5678',
+          renavam: '123456',
+          year: 2021,
+        },
+      });
+
       for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
         const response = await request(app.getHttpServer())
           .put(`/vehicle/${vehicle.id}`)
           .send({
-            brand: 'Honda',
-            chassis: 'DEF456',
-            model: 'Civic',
-            plate: 'XYZ5678',
-            renavam: '123456',
-            year: 2021,
-            [uniqueField]: vehicle[uniqueField],
+            [uniqueField]: vehicle2[uniqueField],
           });
 
         expect(response.status).to.equal(HttpStatus.CONFLICT);
