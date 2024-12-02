@@ -65,15 +65,17 @@ export class VehicleController {
         switch (e.id) {
           case ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE:
           case ErrorCodes.PAGE_EXCEEDS_MAX:
-            throw new BadRequestException(e.message, e.stack);
+            throw new BadRequestException(e.message);
           default:
-            throw new InternalServerErrorException(e.message, e.stack);
+            throw new InternalServerErrorException(e.message);
         }
       }
 
-      throw new InternalServerErrorException(
-        e instanceof Error ? e.message : e,
-      );
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message, e.stack);
+      }
+
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -134,15 +136,17 @@ export class VehicleController {
       if (e instanceof AppError) {
         switch (e.id) {
           case ErrorCodes.DUPLICATE_VEHICLE:
-            throw new ConflictException(e.message, e.stack);
+            throw new ConflictException(e.message);
           default:
-            throw new InternalServerErrorException(e.message, e.stack);
+            throw new InternalServerErrorException(e.message);
         }
       }
 
-      throw new InternalServerErrorException(
-        e instanceof Error ? e.message : e,
-      );
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message, e.stack);
+      }
+
+      throw new InternalServerErrorException(e);
     }
   }
 
@@ -167,11 +171,35 @@ export class VehicleController {
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
   })
-  updateVehicle(
+  async updateVehicle(
     @Param('id') id: UUID,
     @Body(ValidationPipe) updatedVehicleData: UpdatedVehicleDataDto,
-  ) {
-    throw new NotImplementedException('Method not implemented');
+  ): Promise<VehicleData> {
+    try {
+      const result = await this.vehicleRepository.update({
+        id,
+        updatedData: updatedVehicleData,
+      });
+
+      return VehicleMapper.toDTO(result);
+    } catch (e: unknown) {
+      if (e instanceof AppError) {
+        switch (e.id) {
+          case ErrorCodes.VEHICLE_NOT_FOUND:
+            throw new NotFoundException(e.message);
+          case ErrorCodes.DUPLICATE_VEHICLE:
+            throw new ConflictException(e.message);
+          default:
+            throw new InternalServerErrorException(e.message, e.stack);
+        }
+      }
+
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message, e.stack);
+      }
+
+      throw new InternalServerErrorException(e);
+    }
   }
 
   @Delete(':id')
@@ -202,15 +230,17 @@ export class VehicleController {
       if (e instanceof AppError) {
         switch (e.id) {
           case ErrorCodes.VEHICLE_NOT_FOUND:
-            throw new NotFoundException(e.message, e.stack);
+            throw new NotFoundException(e.message);
           default:
-            throw new InternalServerErrorException(e.message, e.stack);
+            throw new InternalServerErrorException(e.message);
         }
       }
 
-      throw new InternalServerErrorException(
-        e instanceof Error ? e.message : e,
-      );
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message, e.stack);
+      }
+
+      throw new InternalServerErrorException(e);
     }
   }
 }

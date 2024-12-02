@@ -88,7 +88,13 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     updatedData,
   }: Parameters<IVehicleRepository[`update`]>[0]): Promise<Vehicle | null> {
     const existingVehicle = await this.findById({ id });
-    if (!existingVehicle) return null;
+
+    if (!existingVehicle) {
+      throw new AppError(
+        ErrorCodes.VEHICLE_NOT_FOUND,
+        ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
+      );
+    }
 
     const props: VehicleProps = {
       brand: updatedData.brand || existingVehicle.brand,
@@ -111,7 +117,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
       );
     }
 
-    const updatedVehicle = new Vehicle(props);
+    const updatedVehicle = new Vehicle({ id, ...props });
     this.vehicles.set(id, updatedVehicle);
     return updatedVehicle;
   }

@@ -215,16 +215,7 @@ describe(InMemoryVehicleRepository.name, () => {
     expect(storedVehicle).to.deep.include(vehicleData);
   });
 
-  {
-    const initialVehicleData: VehicleProps = {
-      brand: 'Toyota',
-      chassis: 'ABC123',
-      model: 'Corolla',
-      plate: 'XYZ1234',
-      renavam: '567890',
-      year: 2020,
-    };
-
+  describe('update behavior', () => {
     const testUpdateField = async (
       field: keyof VehicleProps,
       newValue: string | number,
@@ -239,6 +230,15 @@ describe(InMemoryVehicleRepository.name, () => {
 
       expect(updatedVehicle?.[field]).to.equal(newValue);
       expect(repositorySourceData.get(vehicle.id)?.[field]).to.equal(newValue);
+    };
+
+    const initialVehicleData: VehicleProps = {
+      brand: 'Toyota',
+      chassis: 'ABC123',
+      model: 'Corolla',
+      plate: 'XYZ1234',
+      renavam: '567890',
+      year: 2020,
     };
 
     it('should update the brand', async () => {
@@ -264,71 +264,86 @@ describe(InMemoryVehicleRepository.name, () => {
     it('should update the year', async () => {
       await testUpdateField('year', 2021);
     });
-  }
 
-  describe('should not update a vehicle with duplicate unique fields', () => {
-    const vehicle1 = {
-      brand: 'Toyota',
-      chassis: 'ABC123',
-      model: 'Corolla',
-      plate: 'XYZ1234',
-      renavam: '567890',
-      year: 2020,
-    };
-    const vehicle2 = {
-      brand: 'Honda',
-      chassis: 'DEF456',
-      model: 'Civic',
-      plate: 'XYZ5678',
-      renavam: '123456',
-      year: 2021,
-    };
+    it('should return the updated vehicle', async () => {
+      const vehicle = await repository.create({ entity: initialVehicleData });
+      const updatedData = { brand: 'UpdatedBrand' };
 
-    it('should fail to update a vehicle with duplicate fields', async () => {
-      const createdVehicle1 = await repository.create({ entity: vehicle1 });
-      const createdVehicle2 = await repository.create({ entity: vehicle2 });
+      const updatedVehicle = await repository.update({
+        id: vehicle.id,
+        updatedData,
+      });
 
-      const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
-
-      for (const uniqueField of uniqueFields) {
-        const updatedData = { [uniqueField]: vehicle1[uniqueField] };
-
-        try {
-          const result = await repository.update({
-            id: createdVehicle2.id,
-            updatedData,
-          });
-
-          expect(result).to.be.null;
-        } catch (e: unknown) {
-          expect(e).to.be.instanceOf(Error);
-        }
-      }
+      expect(updatedVehicle).to.deep.include({
+        ...initialVehicleData,
+        ...updatedData,
+      });
     });
 
-    it('should throw the correct error for duplicate update fields', async () => {
-      const createdVehicle1 = await repository.create({ entity: vehicle1 });
-      const createdVehicle2 = await repository.create({ entity: vehicle2 });
+    describe('should not update a vehicle with duplicate unique fields', () => {
+      const vehicle1 = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
+      const vehicle2 = {
+        brand: 'Honda',
+        chassis: 'DEF456',
+        model: 'Civic',
+        plate: 'XYZ5678',
+        renavam: '123456',
+        year: 2021,
+      };
 
-      const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
+      it('should fail to update a vehicle with duplicate fields', async () => {
+        const createdVehicle1 = await repository.create({ entity: vehicle1 });
+        const createdVehicle2 = await repository.create({ entity: vehicle2 });
 
-      for (const uniqueField of uniqueFields) {
-        try {
-          await repository.update({
-            id: createdVehicle2.id,
-            updatedData: { [uniqueField]: vehicle1[uniqueField] },
-          });
-        } catch (error: unknown) {
-          expect(error).to.be.instanceOf(AppError);
+        const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
 
-          const appError = error as AppError;
-          expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+        for (const uniqueField of uniqueFields) {
+          const updatedData = { [uniqueField]: vehicle1[uniqueField] };
 
-          expect(appError.message).to.contains(
-            ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
-          );
+          try {
+            const result = await repository.update({
+              id: createdVehicle2.id,
+              updatedData,
+            });
+
+            expect(result).to.be.null;
+          } catch (e: unknown) {
+            expect(e).to.be.instanceOf(Error);
+          }
         }
-      }
+      });
+
+      it('should throw the correct error for duplicate update fields', async () => {
+        const createdVehicle1 = await repository.create({ entity: vehicle1 });
+        const createdVehicle2 = await repository.create({ entity: vehicle2 });
+
+        const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
+
+        for (const uniqueField of uniqueFields) {
+          try {
+            await repository.update({
+              id: createdVehicle2.id,
+              updatedData: { [uniqueField]: vehicle1[uniqueField] },
+            });
+          } catch (error: unknown) {
+            expect(error).to.be.instanceOf(AppError);
+
+            const appError = error as AppError;
+            expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+            expect(appError.message).to.contains(
+              ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+            );
+          }
+        }
+      });
     });
   });
 
@@ -388,15 +403,5 @@ describe(InMemoryVehicleRepository.name, () => {
     const vehicle = await repository.findById({ id: nonExistentId });
 
     expect(vehicle).to.be.null;
-  });
-
-  it('should return null when updating a non-existent vehicle', async () => {
-    const nonExistentId = randomUUID();
-    const updatedVehicle = await repository.update({
-      id: nonExistentId,
-      updatedData: { brand: 'UpdatedBrand' },
-    });
-
-    expect(updatedVehicle).to.be.null;
   });
 });

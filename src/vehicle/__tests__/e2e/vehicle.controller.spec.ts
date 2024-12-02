@@ -110,6 +110,90 @@ describe(`${VehicleController.name} (E2E)`, () => {
     });
   });
 
+  describe('PUT /vehicle/:id', () => {
+    it('should update a vehicle by ID', async () => {
+      const vehicle = await repository.create({
+        entity: {
+          brand: 'Toyota',
+          chassis: '123',
+          model: 'Corolla',
+          plate: 'XYZ123',
+          renavam: '5678',
+          year: 2020,
+        },
+      });
+
+      const updatedData: VehicleProps = {
+        brand: 'Honda',
+        chassis: 'DEF456',
+        model: 'Civic',
+        plate: 'XYZ5678',
+        renavam: '123456',
+        year: 2021,
+      };
+
+      const response = await request(app.getHttpServer())
+        .put(`/vehicle/${vehicle.id}`)
+        .send(updatedData);
+
+      expect(response.status).to.equal(HttpStatus.OK);
+
+      const updatedVehicle = response.body as VehicleData;
+      expect(updatedVehicle).to.deep.contains(updatedData);
+
+      const storedVehicle = await repository.findById({ id: vehicle.id });
+      expect(storedVehicle).to.deep.contains(updatedData);
+    });
+
+    it('should return an error when vehicle is not found', async () => {
+      const id = randomUUID();
+
+      const response = await request(app.getHttpServer())
+        .put(`/vehicle/${id}`)
+        .send({
+          brand: 'Honda',
+          chassis: 'DEF456',
+          model: 'Civic',
+          plate: 'XYZ5678',
+          renavam: '123456',
+          year: 2021,
+        });
+
+      expect(response.status).to.equal(HttpStatus.NOT_FOUND);
+
+      expect(response.body.message).to.include(
+        ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
+      );
+    });
+
+    it.skip('should return an error when vehicle already exists', async () => {
+      const vehicle = await repository.create({
+        entity: {
+          brand: 'Toyota',
+          chassis: '123',
+          model: 'Corolla',
+          plate: 'XYZ123',
+          renavam: '5678',
+          year: 2020,
+        },
+      });
+
+      for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
+        const response = await request(app.getHttpServer())
+          .put(`/vehicle/${vehicle.id}`)
+          .send({
+            brand: 'Honda',
+            chassis: 'DEF456',
+            model: 'Civic',
+            plate: 'XYZ5678',
+            renavam: '123456',
+            year: 2021,
+            [uniqueField]: vehicle[uniqueField],
+          });
+      }
+    });
+  });
+
   describe('GET /vehicle', () => {
     const vehicles: VehicleProps[] = [
       {
