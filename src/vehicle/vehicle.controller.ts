@@ -19,7 +19,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
 import { ListVehicleData } from './dto/list-vehicle.dto';
 import { AppError } from '@src/utils/app.error';
-import { ERROR_MESSAGES, ErrorCodes } from './constants/errors.constants';
+import { ErrorCodes } from './constants/errors.constants';
 
 @ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
 @Controller('vehicle')
@@ -56,14 +56,14 @@ export class VehicleController {
         switch (e.id) {
           case ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE:
           case ErrorCodes.PAGE_EXCEEDS_MAX:
-            throw new BadRequestException(e.message);
+            throw new BadRequestException(e.message, e.stack);
           default:
-            throw new InternalServerErrorException(e.message);
+            throw new InternalServerErrorException(e.message, e.stack);
         }
       }
 
       if (e instanceof Error) {
-        throw new InternalServerErrorException(e.message);
+        throw new InternalServerErrorException(e.message, e.stack);
       }
 
       throw new InternalServerErrorException(e);
