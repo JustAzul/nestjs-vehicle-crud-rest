@@ -40,6 +40,7 @@ export class VehicleController {
     description: 'List of vehicles retrieved successfully.',
     type: ListVehicleData,
   })
+  @ApiResponse({ status: 400, description: 'Invalid page or page size.' })
   async getAllVehicles(
     @Query('page') page: number = 1,
     @Query('pageSize') pageSize: number = DEFAULT_PAGE_SIZE,
