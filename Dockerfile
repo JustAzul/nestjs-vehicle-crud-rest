@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm ci
 
 # Copy the rest of the application files
 COPY . .
@@ -22,15 +22,11 @@ FROM node:20.13.1-alpine AS production
 # Set working directory
 WORKDIR /app
 
-# Copy necessary files from the builder stage
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
-
-# Install production dependencies only
-RUN npm install --omit=dev
+# Copy files from the builder stage
+COPY --from=builder /app ./
 
 # Expose the application port
 EXPOSE 3000
 
 # Define the command to run the application
-CMD ["node", "dist/main.js"]
+CMD ["npm", "run", "start:prod"]
