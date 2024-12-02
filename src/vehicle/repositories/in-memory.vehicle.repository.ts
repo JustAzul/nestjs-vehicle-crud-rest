@@ -123,7 +123,7 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     return this.vehicles.delete(id);
   }
 
-  checkDuplicate({
+  private checkDuplicate({
     entity,
     excludeId,
   }: {
