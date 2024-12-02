@@ -73,7 +73,17 @@ describe(InMemoryVehicleRepository.name, () => {
 
       for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
         try {
-          await repository.create({ entity: vehicleData });
+          await repository.create({
+            entity: {
+              brand: 'Honda',
+              chassis: 'DEF456',
+              model: 'Civic',
+              plate: 'XYZ5678',
+              renavam: '123456',
+              year: 2021,
+              [uniqueField]: vehicleData[uniqueField],
+            },
+          });
         } catch (error: unknown) {
           expect(error).to.be.instanceOf(AppError);
 
