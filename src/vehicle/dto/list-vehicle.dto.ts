@@ -38,6 +38,18 @@ export class VehicleData {
   year: number;
 }
 
+class Metadata {
+  @ApiProperty({
+    description: 'Total number of pages',
+  })
+  totalPages: number;
+
+  @ApiProperty({
+    description: 'Page number',
+  })
+  page: number;
+}
+
 export class ListVehicleData {
   @ApiProperty({
     description: 'Array of vehicle data.',
@@ -48,8 +60,5 @@ export class ListVehicleData {
   @ApiProperty({
     description: 'Pagination metadata.',
   })
-  metadata: {
-    totalPages: number;
-    page: number;
-  };
+  metadata: Metadata;
 }
