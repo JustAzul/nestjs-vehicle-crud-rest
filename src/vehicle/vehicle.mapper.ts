@@ -1,7 +1,7 @@
 import { VehicleData } from './dto/list-vehicle.dto';
 import { Vehicle } from './entities/vehicle.entity';
 
-export class VehicleMapper {
+export abstract class VehicleMapper {
   static toDTO(entity: Vehicle): VehicleData {
     return {
       id: entity.id,
