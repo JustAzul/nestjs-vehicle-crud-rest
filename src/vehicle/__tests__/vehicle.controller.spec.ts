@@ -10,6 +10,7 @@ import { VEHICLE_UNIQUE_FIELDS } from '../constants/module.contants';
 import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
 import { ListVehicleData } from '../dto/list-vehicle.dto';
 import { VehicleController } from '../vehicle.controller';
+import { ERROR_MESSAGES } from '../constants/errors.constants';
 
 describe(`${VehicleController.name} (E2E)`, () => {
   let repositorySourceData: Map<UUID, Vehicle>;
@@ -123,6 +124,37 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.metadata).to.be.an('object');
       expect(body.metadata.page).to.equal(String(page));
       expect(body.metadata.totalPages).to.equal(2);
+    });
+
+    it('should return an error when page or pageSize is invalid', async () => {
+      const invalidQueries = [
+        { page: 0, pageSize: 10 },
+        { page: 1, pageSize: 0 },
+      ];
+
+      for (const query of invalidQueries) {
+        const response = await request(app.getHttpServer())
+          .get('/vehicle')
+          .query(query);
+
+        expect(response.status).to.equal(400);
+
+        expect(response.body.message).to.contains(
+          ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
+        );
+      }
+    });
+
+    it.skip('should return an error if page exceeds the maximum', async () => {
+      const page = 3;
+      const pageSize = 2;
+
+      const response = await request(app.getHttpServer())
+        .get('/vehicle')
+        .query({ page, pageSize })
+        .expect(400);
+
+      expect(response.body.message).to.include('exceeds maximum page number');
     });
   });
 });

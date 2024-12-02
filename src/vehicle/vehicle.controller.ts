@@ -9,13 +9,17 @@ import {
   NotImplementedException,
   ValidationPipe,
   Query,
+  InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { VehicleDataDto } from './dto/vehicle-data.dto';
 import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
-import { ListVehicleData, VehicleData } from './dto/list-vehicle.dto';
+import { ListVehicleData } from './dto/list-vehicle.dto';
+import { AppError } from '@src/app.error';
+import { ERROR_MESSAGES, ErrorCodes } from './constants/errors.constants';
 
 @ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
 @Controller('vehicle')
@@ -34,18 +38,40 @@ export class VehicleController {
     type: ListVehicleData,
   })
   async getAllVehicles(
-    @Query('page') page?: number,
-    @Query('pageSize') pageSize?: number,
+    @Query('page') page: number = 1,
+    @Query('pageSize') pageSize: number = 10,
   ): Promise<ListVehicleData> {
-    const { data, metadata } = await this.vehicleRepository.findAll({
-      page: page || 1,
-      pageSize: pageSize || 10,
-    });
+    try {
+      const { data, metadata } = await this.vehicleRepository.findAll({
+        page,
+        pageSize,
+      });
 
-    return {
-      data,
-      metadata,
-    };
+      return {
+        data,
+        metadata,
+      };
+    } catch (e: unknown) {
+      if (e instanceof AppError) {
+        if (e.id === ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE) {
+          throw new BadRequestException(
+            ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
+          );
+        }
+
+        if (e.id === ErrorCodes.PAGE_EXCEEDS_MAX) {
+          throw new BadRequestException(ERROR_MESSAGES.PAGE_EXCEEDS_MAX());
+        }
+
+        console.error(e);
+      }
+
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message);
+      }
+
+      throw new InternalServerErrorException(e);
+    }
   }
 
   // GET /vehicle/:id - Get a specific vehicle by ID
