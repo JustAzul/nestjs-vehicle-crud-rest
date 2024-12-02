@@ -26,12 +26,13 @@ src
 ## Funcionalidades
 
 - **Operações CRUD**: Gerenciamento completo de veículos com funcionalidades de Criar, Ler, Atualizar e Deletar.
-- **Paginção**: Suporte para paginação em listagens, com parâmetros de página e tamanho configuráveis.
+- **Paginação**: Suporte para paginação em listagens, com parâmetros de página e tamanho configuráveis.
 - **Validação de Campos Únicos**: Verificação e tratamento de duplicação para campos como `chassis`, `placa` e `renavam`.
 - **Documentação com Swagger**: Documentação interativa da API disponível em `/api`.
 - **Banco de Dados em Memória**: Configuração simplificada com repositório em memória.
 - **Validação e Tratamento de Erros**: Validação de entrada com `class-validator` e tratamento de erros consistente.
 - **Testes Automatizados**: Testes unitários e de ponta a ponta com Mocha e Chai.
+- **Cobertura de Testes**: Relatórios de cobertura detalhados com `nyc`.
 - **Ambiente Dockerizado**: Configuração e execução simplificadas com Docker.
 
 ---
@@ -76,10 +77,93 @@ http://localhost:3000/api
 
 ---
 
-## Testes
+## Casos de Teste
 
-Execute os testes:
+### Executar Testes
 
 ```bash
 $ docker compose run app sh -c "npm run test"
 ```
+
+### Casos de Teste do `VehicleController (E2E)`
+
+- **POST /vehicle**
+  - ✔ Deve criar um novo veículo
+  - ✔ Deve retornar erro se o veículo já existir
+- **PUT /vehicle/:id**
+  - ✔ Deve atualizar um veículo pelo ID
+  - ✔ Deve retornar erro se o veículo não for encontrado
+  - ✔ Deve retornar erro ao tentar atualizar campos únicos
+- **GET /vehicle**
+  - ✔ Deve retornar a primeira página de veículos
+  - ✔ Deve retornar a segunda página de veículos
+  - ✔ Deve retornar resultados da primeira página quando nenhuma consulta for fornecida
+  - ✔ Deve retornar erro para valores inválidos de página ou tamanho de página
+  - ✔ Deve retornar erro se a página solicitada exceder o máximo
+- **GET /vehicle/:id**
+  - ✔ Deve retornar um veículo pelo ID
+  - ✔ Deve retornar erro se o veículo não for encontrado
+- **DELETE /vehicle/:id**
+  - ✔ Deve deletar um veículo pelo ID
+  - ✔ Deve retornar sucesso ao deletar um veículo
+  - ✔ Deve retornar erro se o veículo não for encontrado
+
+### Casos de Teste do `InMemoryVehicleRepository`
+
+- **Criar Veículos**
+  - ✔ Deve criar um novo veículo
+  - ✔ Deve retornar erro para campos únicos duplicados
+- **Consulta por ID**
+  - ✔ Deve retornar um veículo pelo ID
+  - ✔ Deve retornar `null` para IDs inexistentes
+- **Paginação**
+  - ✔ Deve recuperar veículos com paginação
+  - ✔ Deve retornar erro para paginação inválida
+  - ✔ Deve retornar erro se a página solicitada exceder o máximo
+- **Atualização**
+  - ✔ Deve atualizar campos como `brand`, `chassis`, `model`, `plate`, e `renavam`
+  - ✔ Deve retornar erro ao atualizar um veículo inexistente
+  - ✔ Deve retornar erro ao tentar atualizar com valores duplicados
+- **Deleção**
+  - ✔ Deve deletar um veículo pelo ID
+  - ✔ Deve retornar sucesso ao deletar
+  - ✔ Deve retornar erro para veículos inexistentes
+
+---
+
+## Cobertura de Testes
+
+A cobertura de testes está configurada com `nyc`. Abaixo está o resumo atual:
+
+```plaintext
+-------------------------------------|---------|----------|---------|---------|-------------------
+File                                 | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+-------------------------------------|---------|----------|---------|---------|-------------------
+All files                            |       0 |        0 |       0 |       0 |
+ src                                 |       0 |      100 |       0 |       0 |
+  app.error.ts                       |       0 |      100 |       0 |       0 | 5-6
+ src/vehicle                         |       0 |      100 |       0 |       0 |
+  vehicle.mapper.ts                  |       0 |      100 |       0 |       0 | 6-18
+ src/vehicle/constants               |       0 |      100 |       0 |       0 |
+  errors.constants.ts                |       0 |      100 |       0 |       0 | 8-15
+  module.contants.ts                 |       0 |      100 |     100 |       0 | 3-9
+ src/vehicle/dto                     |       0 |        0 |       0 |       0 |
+  update-vehicle-data.dto.ts         |       0 |        0 |       0 |       0 |
+ src/vehicle/entities                |       0 |        0 |       0 |       0 |
+  vehicle.entity.ts                  |       0 |        0 |       0 |       0 | 15-48
+ src/vehicle/repositories            |       0 |        0 |       0 |       0 |
+  in-memory.vehicle.repository.ts    |       0 |        0 |       0 |       0 | 15-160
+ src/vehicle/repositories/interfaces |       0 |        0 |       0 |       0 |
+  vehicle.repository.ts              |       0 |        0 |       0 |       0 |
+-------------------------------------|---------|----------|---------|---------|-------------------
+```
+
+### Como Gerar o Relatório de Cobertura
+
+Para gerar o relatório de cobertura localmente, use:
+
+```bash
+$ docker compose run app sh -c "npm run test:cov"
+```
+
+Os detalhes da cobertura serão exibidos no terminal.
