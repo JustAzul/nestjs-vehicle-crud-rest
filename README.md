@@ -41,7 +41,7 @@ Clone o repositório e instale as dependências:
 ```bash
 $ git clone https://github.com/JustAzul/nestjs-vehicle-crud-rest.git
 $ cd nestjs-vehicle-crud-rest
-$ npm install
+$ npm ci
 ```
 
 ---
