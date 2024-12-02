@@ -1,8 +1,8 @@
 {
   "name": "nestjs-vehicle-crud-rest",
-  "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "version": "1.0.0",
+  "description": "A simple CRUD REST API for vehicles using NestJS, Mocha, Chai, and Swagger",
+  "author": "Diego (Azul) Ferreira",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
