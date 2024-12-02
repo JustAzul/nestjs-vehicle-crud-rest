@@ -4,7 +4,7 @@ import {
   IVehicleRepository,
   PaginatedVehicleResult,
 } from './interfaces/vehicle.repository';
-import { AppError } from '@src/utils/app.error';
+import { AppError } from '@src/app.error';
 import { ERROR_MESSAGES, ErrorCodes } from '../constants/errors.constants';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {

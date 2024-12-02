@@ -8,7 +8,7 @@ import {
   ERROR_MESSAGES,
   ErrorCodes,
 } from '@src/vehicle/constants/errors.constants';
-import { AppError } from '@src/utils/app.error';
+import { AppError } from '@src/app.error';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
