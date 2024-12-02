@@ -167,6 +167,10 @@ export class VehicleController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid input data.',
   })
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Vehicle already exists.',
+  })
   @ApiParam({
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
