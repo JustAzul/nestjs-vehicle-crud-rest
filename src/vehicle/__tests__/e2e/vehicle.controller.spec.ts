@@ -166,7 +166,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       );
     });
 
-    it.skip('should return an error when vehicle already exists', async () => {
+    it('should return an error when trying to update unique fields', async () => {
       const vehicle = await repository.create({
         entity: {
           brand: 'Toyota',
@@ -190,6 +190,12 @@ describe(`${VehicleController.name} (E2E)`, () => {
             year: 2021,
             [uniqueField]: vehicle[uniqueField],
           });
+
+        expect(response.status).to.equal(HttpStatus.CONFLICT);
+
+        expect(response.body.message).to.include(
+          ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+        );
       }
     });
   });
