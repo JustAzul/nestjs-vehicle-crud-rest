@@ -322,9 +322,7 @@ describe(InMemoryVehicleRepository.name, () => {
         const createdVehicle1 = await repository.create({ entity: vehicle1 });
         const createdVehicle2 = await repository.create({ entity: vehicle2 });
 
-        const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
-
-        for (const uniqueField of uniqueFields) {
+        for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
           const updatedData = { [uniqueField]: vehicle1[uniqueField] };
 
           try {
