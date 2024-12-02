@@ -4,7 +4,8 @@ import {
   IVehicleRepository,
   PaginatedVehicleResult,
 } from './interfaces/vehicle.repository';
-import { ERROR_MESSAGES } from '../constants/module.contants';
+import { AppError } from '@src/app.error';
+import { ERROR_MESSAGES, ErrorCodes } from '../constants/errors.constants';
 
 export class InMemoryVehicleRepository implements IVehicleRepository {
   constructor(
@@ -23,7 +24,10 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     });
 
     if (duplicateField) {
-      throw new Error(ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField));
+      throw new AppError(
+        ErrorCodes.DUPLICATE_VEHICLE,
+        ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField),
+      );
     }
 
     const newVehicle: Vehicle = new Vehicle(entity);
@@ -40,7 +44,10 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     IVehicleRepository[`findAll`]
   >[0]): Promise<PaginatedVehicleResult> {
     if ((page && page < 1) || (pageSize && pageSize < 1)) {
-      throw new Error(ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE());
+      throw new AppError(
+        ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE,
+        ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
+      );
     }
 
     const allVehicles = Array.from(this.vehicles.values());
@@ -48,7 +55,10 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     const maxPage = Math.ceil(totalItems / pageSize);
 
     if (page > maxPage) {
-      throw new Error(ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage));
+      throw new AppError(
+        ErrorCodes.PAGE_EXCEEDS_MAX,
+        ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage),
+      );
     }
 
     const startIndex = (page - 1) * pageSize;
@@ -95,7 +105,10 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
     });
 
     if (duplicateField) {
-      throw new Error(ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField));
+      throw new AppError(
+        ErrorCodes.DUPLICATE_VEHICLE,
+        ERROR_MESSAGES.DUPLICATE_VEHICLE(duplicateField),
+      );
     }
 
     const updatedVehicle = new Vehicle(props);

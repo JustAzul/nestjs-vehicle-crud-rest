@@ -4,10 +4,8 @@ import { Vehicle, VehicleProps } from 'src/vehicle/entities/vehicle.entity';
 import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.vehicle.repository';
 import { randomUUID, UUID } from 'crypto';
 import { IVehicleRepository } from 'src/vehicle/repositories/interfaces/vehicle.repository';
-import {
-  ERROR_MESSAGES,
-  VEHICLE_UNIQUE_FIELDS,
-} from '@src/vehicle/constants/module.contants';
+import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
+import { ERROR_MESSAGES } from '@src/vehicle/constants/errors.constants';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
