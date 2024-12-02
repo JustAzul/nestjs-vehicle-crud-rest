@@ -15,7 +15,6 @@ import { ListVehicleData } from '../../dto/list-vehicle.dto';
 import { VehicleController } from '../../vehicle.controller';
 import { ERROR_MESSAGES } from '../../constants/errors.constants';
 import { VehicleMapper } from '@src/vehicle/vehicle.mapper';
-import { STATUS_CODES } from 'http';
 
 describe(`${VehicleController.name} (E2E)`, () => {
   let repositorySourceData: Map<UUID, Vehicle>;
