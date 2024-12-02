@@ -96,17 +96,8 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
       );
     }
 
-    const props: VehicleProps = {
-      brand: updatedData.brand || existingVehicle.brand,
-      chassis: updatedData.chassis || existingVehicle.chassis,
-      model: updatedData.model || existingVehicle.model,
-      plate: updatedData.plate || existingVehicle.plate,
-      renavam: updatedData.renavam || existingVehicle.renavam,
-      year: updatedData.year || existingVehicle.year,
-    };
-
     const duplicateField = this.checkDuplicate({
-      entity: props,
+      entity: updatedData,
       excludeId: id,
     });
 
@@ -117,7 +108,17 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
       );
     }
 
-    const updatedVehicle = new Vehicle({ id, ...props });
+    const updatedVehicle = new Vehicle({
+      brand: existingVehicle.brand,
+      chassis: existingVehicle.chassis,
+      model: existingVehicle.model,
+      plate: existingVehicle.plate,
+      renavam: existingVehicle.renavam,
+      year: existingVehicle.year,
+      id,
+      ...updatedData,
+    });
+
     this.vehicles.set(id, updatedVehicle);
     return updatedVehicle;
   }
