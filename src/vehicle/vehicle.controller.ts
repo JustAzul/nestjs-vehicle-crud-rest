@@ -53,17 +53,13 @@ export class VehicleController {
       };
     } catch (e: unknown) {
       if (e instanceof AppError) {
-        if (e.id === ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE) {
-          throw new BadRequestException(
-            ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
-          );
+        switch (e.id) {
+          case ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE:
+          case ErrorCodes.PAGE_EXCEEDS_MAX:
+            throw new BadRequestException(e.message);
+          default:
+            throw new InternalServerErrorException(e.message);
         }
-
-        if (e.id === ErrorCodes.PAGE_EXCEEDS_MAX) {
-          throw new BadRequestException(ERROR_MESSAGES.PAGE_EXCEEDS_MAX());
-        }
-
-        console.error(e);
       }
 
       if (e instanceof Error) {

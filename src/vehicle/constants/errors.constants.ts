@@ -4,7 +4,7 @@ export enum ErrorCodes {
   PAGE_EXCEEDS_MAX = 'PAGE_EXCEEDS_MAX',
 }
 
-export const ERROR_MESSAGES: Record<keyof typeof ErrorCodes, Function> = {
+export const ERROR_MESSAGES = {
   DUPLICATE_VEHICLE: (field: string) =>
     `Vehicle with the same ${field} already exists`,
   INVALID_PAGE_OR_PAGE_SIZE: () =>
