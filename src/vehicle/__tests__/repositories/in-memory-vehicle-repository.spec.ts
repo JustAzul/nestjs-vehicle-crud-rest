@@ -333,7 +333,14 @@ describe(InMemoryVehicleRepository.name, () => {
 
             expect(result).to.be.null;
           } catch (e: unknown) {
-            expect(e).to.be.instanceOf(Error);
+            expect(e).to.be.instanceOf(AppError);
+
+            const appError = e as AppError;
+            expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+            expect(appError.message).to.contains(
+              ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+            );
           }
         }
       });
