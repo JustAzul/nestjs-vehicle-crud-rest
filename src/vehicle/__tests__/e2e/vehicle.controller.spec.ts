@@ -145,16 +145,19 @@ describe(`${VehicleController.name} (E2E)`, () => {
       }
     });
 
-    it.skip('should return an error if page exceeds the maximum', async () => {
+    it('should return an error if page exceeds the maximum', async () => {
       const page = 3;
       const pageSize = 2;
+      const maxPage = Math.ceil(vehicles.length / pageSize);
 
       const response = await request(app.getHttpServer())
         .get('/vehicle')
         .query({ page, pageSize })
         .expect(400);
 
-      expect(response.body.message).to.include('exceeds maximum page number');
+      expect(response.body.message).to.include(
+        ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage),
+      );
     });
   });
 });
