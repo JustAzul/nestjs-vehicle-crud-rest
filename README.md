@@ -56,7 +56,7 @@ http://localhost:3000/api
 
 ### Screenshot do Swagger
 
-picture
+![image](https://github.com/user-attachments/assets/9f518e88-de3d-4fc3-880e-525be57b7bdc)
 
 ---
 
