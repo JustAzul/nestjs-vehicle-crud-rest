@@ -5,7 +5,11 @@ import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.ve
 import { randomUUID, UUID } from 'crypto';
 import { IVehicleRepository } from 'src/vehicle/repositories/interfaces/vehicle.repository';
 import { VEHICLE_UNIQUE_FIELDS } from '@src/vehicle/constants/module.contants';
-import { ERROR_MESSAGES } from '@src/vehicle/constants/errors.constants';
+import {
+  ERROR_MESSAGES,
+  ErrorCodes,
+} from '@src/vehicle/constants/errors.constants';
+import { AppError } from '@src/utils/app.error';
 
 describe(InMemoryVehicleRepository.name, () => {
   let repository: IVehicleRepository;
@@ -50,7 +54,12 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.create({ entity: vehicleData });
     } catch (error: unknown) {
-      expect((error as Error).message).to.contains(
+      expect(error).to.be.instanceOf(AppError);
+
+      const appError = error as AppError;
+      expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+      expect(appError.message).to.contains(
         ERROR_MESSAGES.DUPLICATE_VEHICLE('chassis'),
       );
     }
@@ -109,7 +118,12 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 0, pageSize: 10 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.contains(
+      expect(error).to.be.instanceOf(AppError);
+
+      const appError = error as AppError;
+      expect(appError.id).to.equal(ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE);
+
+      expect(appError.message).to.contains(
         ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
       );
     }
@@ -117,7 +131,12 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 1, pageSize: 0 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.contains(
+      expect(error).to.be.instanceOf(AppError);
+
+      const appError = error as AppError;
+      expect(appError.id).to.equal(ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE);
+
+      expect(appError.message).to.contains(
         ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
       );
     }
@@ -138,7 +157,12 @@ describe(InMemoryVehicleRepository.name, () => {
     try {
       await repository.findAll({ page: 2, pageSize: 1 });
     } catch (error: unknown) {
-      expect((error as Error).message).to.contains(
+      expect(error).to.be.instanceOf(AppError);
+
+      const appError = error as AppError;
+      expect(appError.id).to.equal(ErrorCodes.PAGE_EXCEEDS_MAX);
+
+      expect(appError.message).to.contains(
         ERROR_MESSAGES.PAGE_EXCEEDS_MAX(2, 1),
       );
     }
@@ -241,7 +265,12 @@ describe(InMemoryVehicleRepository.name, () => {
           updatedData: { [uniqueField]: vehicle1[uniqueField] },
         });
       } catch (error: unknown) {
-        expect((error as Error).message).to.contains(
+        expect(error).to.be.instanceOf(AppError);
+
+        const appError = error as AppError;
+        expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+        expect(appError.message).to.contains(
           ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
         );
       }
