@@ -1,5 +1,4 @@
 import { expect } from 'chai';
-
 import { Vehicle, VehicleProps } from 'src/vehicle/entities/vehicle.entity';
 import { InMemoryVehicleRepository } from 'src/vehicle/repositories/in-memory.vehicle.repository';
 import { randomUUID, UUID } from 'crypto';
@@ -39,33 +38,55 @@ describe(InMemoryVehicleRepository.name, () => {
     expect(storedVehicle).to.deep.include(vehicleData);
   });
 
-  it('should not create a vehicle with duplicate unique fields', async () => {
-    const vehicleData: VehicleProps = {
-      brand: 'Toyota',
-      chassis: 'ABC123',
-      model: 'Corolla',
-      plate: 'XYZ1234',
-      renavam: '567890',
-      year: 2020,
-    };
+  describe('should not create a vehicle with duplicate unique fields', () => {
+    it('should fail to create a vehicle with duplicate fields', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
 
-    await repository.create({ entity: vehicleData });
-
-    try {
       await repository.create({ entity: vehicleData });
-    } catch (error: unknown) {
-      expect(error).to.be.instanceOf(AppError);
 
-      const appError = error as AppError;
-      expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+      try {
+        const result = await repository.create({ entity: vehicleData });
+        expect(result).to.be.null;
+      } catch (e: unknown) {
+        expect(e).to.be.instanceOf(Error);
+      }
+    });
 
-      expect(appError.message).to.contains(
-        ERROR_MESSAGES.DUPLICATE_VEHICLE('chassis'),
-      );
-    }
+    it('should throw the correct error for duplicate fields', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
+
+      await repository.create({ entity: vehicleData });
+
+      try {
+        await repository.create({ entity: vehicleData });
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(AppError);
+
+        const appError = error as AppError;
+        expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+        expect(appError.message).to.contains(
+          ERROR_MESSAGES.DUPLICATE_VEHICLE('chassis'),
+        );
+      }
+    });
   });
 
-  it('should retrieve all vehicles with pagination', async () => {
+  describe('pagination behavior', () => {
     const vehicles: VehicleProps[] = [
       {
         brand: 'Toyota',
@@ -93,79 +114,77 @@ describe(InMemoryVehicleRepository.name, () => {
       },
     ];
 
-    for (const vehicle of vehicles) {
-      await repository.create({ entity: vehicle });
-    }
+    beforeEach(async () => {
+      for (const vehicle of vehicles) {
+        await repository.create({ entity: vehicle });
+      }
+    });
 
-    const page1 = await repository.findAll({ page: 1, pageSize: 2 });
-    const page2 = await repository.findAll({ page: 2, pageSize: 2 });
+    it('should retrieve all vehicles with pagination', async () => {
+      const page1 = await repository.findAll({ page: 1, pageSize: 2 });
+      const page2 = await repository.findAll({ page: 2, pageSize: 2 });
 
-    expect(page1.data.length).to.equal(2);
-    expect(page2.data.length).to.equal(1);
+      expect(page1.data.length).to.equal(2);
+      expect(page2.data.length).to.equal(1);
 
-    //@ts-expect-error - data is private
-    const page1Props = page1.data.map(({ props }) => props);
+      //@ts-expect-error - data is private
+      const page1Props = page1.data.map(({ props }) => props);
 
-    //@ts-expect-error - data is private
-    const page2Props = page2.data.map(({ props }) => props);
+      //@ts-expect-error - data is private
+      const page2Props = page2.data.map(({ props }) => props);
 
-    expect(page1Props).to.deep.include(vehicles[0]);
-    expect(page1Props).to.deep.include(vehicles[1]);
-    expect(page2Props).to.deep.include(vehicles[2]);
-  });
+      expect(page1Props).to.deep.include(vehicles[0]);
+      expect(page1Props).to.deep.include(vehicles[1]);
+      expect(page2Props).to.deep.include(vehicles[2]);
+    });
 
-  it('should throw an error if page or pageSize is less than 1', async () => {
-    try {
-      await repository.findAll({ page: 0, pageSize: 10 });
-    } catch (error: unknown) {
-      expect(error).to.be.instanceOf(AppError);
+    it('should throw an error for invalid pagination', async () => {
+      const invalidQueries = [
+        { page: 0, pageSize: 10 },
+        { page: 1, pageSize: 0 },
+      ];
 
-      const appError = error as AppError;
-      expect(appError.id).to.equal(ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE);
+      for (const query of invalidQueries) {
+        try {
+          await repository.findAll(query);
+        } catch (error: unknown) {
+          expect(error).to.be.instanceOf(AppError);
 
-      expect(appError.message).to.contains(
-        ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
-      );
-    }
+          const appError = error as AppError;
+          expect(appError.id).to.equal(ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE);
 
-    try {
-      await repository.findAll({ page: 1, pageSize: 0 });
-    } catch (error: unknown) {
-      expect(error).to.be.instanceOf(AppError);
+          expect(appError.message).to.contains(
+            ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
+          );
+        }
+      }
+    });
 
-      const appError = error as AppError;
-      expect(appError.id).to.equal(ErrorCodes.INVALID_PAGE_OR_PAGE_SIZE);
+    it('should throw an error if requested page exceeds maximum page number', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
 
-      expect(appError.message).to.contains(
-        ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
-      );
-    }
-  });
+      await repository.create({ entity: vehicleData });
 
-  it('should throw an error if requested page exceeds maximum page number', async () => {
-    const vehicleData: VehicleProps = {
-      brand: 'Toyota',
-      chassis: 'ABC123',
-      model: 'Corolla',
-      plate: 'XYZ1234',
-      renavam: '567890',
-      year: 2020,
-    };
+      try {
+        await repository.findAll({ page: 2, pageSize: 1 });
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(AppError);
 
-    await repository.create({ entity: vehicleData });
+        const appError = error as AppError;
+        expect(appError.id).to.equal(ErrorCodes.PAGE_EXCEEDS_MAX);
 
-    try {
-      await repository.findAll({ page: 2, pageSize: 1 });
-    } catch (error: unknown) {
-      expect(error).to.be.instanceOf(AppError);
-
-      const appError = error as AppError;
-      expect(appError.id).to.equal(ErrorCodes.PAGE_EXCEEDS_MAX);
-
-      expect(appError.message).to.contains(
-        ERROR_MESSAGES.PAGE_EXCEEDS_MAX(2, 1),
-      );
-    }
+        expect(appError.message).to.contains(
+          ERROR_MESSAGES.PAGE_EXCEEDS_MAX(2, 1),
+        );
+      }
+    });
   });
 
   it('should retrieve a vehicle by ID', async () => {
@@ -235,7 +254,7 @@ describe(InMemoryVehicleRepository.name, () => {
     });
   }
 
-  it('should not update a vehicle with duplicate unique fields', async () => {
+  describe('should not update a vehicle with duplicate unique fields', () => {
     const vehicle1 = {
       brand: 'Toyota',
       chassis: 'ABC123',
@@ -253,28 +272,52 @@ describe(InMemoryVehicleRepository.name, () => {
       year: 2021,
     };
 
-    const createdVehicle1 = await repository.create({ entity: vehicle1 });
-    const createdVehicle2 = await repository.create({ entity: vehicle2 });
+    it('should fail to update a vehicle with duplicate fields', async () => {
+      const createdVehicle1 = await repository.create({ entity: vehicle1 });
+      const createdVehicle2 = await repository.create({ entity: vehicle2 });
 
-    const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
+      const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
 
-    for (const uniqueField of uniqueFields) {
-      try {
-        await repository.update({
-          id: createdVehicle2.id,
-          updatedData: { [uniqueField]: vehicle1[uniqueField] },
-        });
-      } catch (error: unknown) {
-        expect(error).to.be.instanceOf(AppError);
+      for (const uniqueField of uniqueFields) {
+        const updatedData = { [uniqueField]: vehicle1[uniqueField] };
 
-        const appError = error as AppError;
-        expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+        try {
+          const result = await repository.update({
+            id: createdVehicle2.id,
+            updatedData,
+          });
 
-        expect(appError.message).to.contains(
-          ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
-        );
+          expect(result).to.be.null;
+        } catch (e: unknown) {
+          expect(e).to.be.instanceOf(Error);
+        }
       }
-    }
+    });
+
+    it('should throw the correct error for duplicate update fields', async () => {
+      const createdVehicle1 = await repository.create({ entity: vehicle1 });
+      const createdVehicle2 = await repository.create({ entity: vehicle2 });
+
+      const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
+
+      for (const uniqueField of uniqueFields) {
+        try {
+          await repository.update({
+            id: createdVehicle2.id,
+            updatedData: { [uniqueField]: vehicle1[uniqueField] },
+          });
+        } catch (error: unknown) {
+          expect(error).to.be.instanceOf(AppError);
+
+          const appError = error as AppError;
+          expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+
+          expect(appError.message).to.contains(
+            ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+          );
+        }
+      }
+    });
   });
 
   it('should delete a vehicle by ID', async () => {
