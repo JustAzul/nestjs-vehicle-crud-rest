@@ -218,4 +218,72 @@ describe(`${VehicleController.name} (E2E)`, () => {
       );
     });
   });
+
+  describe('DELETE /vehicle/:id', () => {
+    it('should delete a vehicle by ID', async () => {
+      repository = app.get<IVehicleRepository>(IVehicleRepository);
+
+      const vehicle = await repository.create({
+        entity: {
+          brand: 'Toyota',
+          chassis: '123',
+          model: 'Corolla',
+          plate: 'XYZ123',
+          renavam: '5678',
+          year: 2020,
+        },
+      });
+
+      expect(await repository.findById({ id: vehicle.id })).to.be.not.null;
+
+      const response = await request(app.getHttpServer()).delete(
+        `/vehicle/${vehicle.id}`,
+      );
+
+      expect(response.status).to.equal(HttpStatus.OK);
+
+      const deletedVehicle = await repository.findById({ id: vehicle.id });
+      expect(deletedVehicle).to.be.null;
+    });
+
+    it('should return true when vehicle is deleted', async () => {
+      repository = app.get<IVehicleRepository>(IVehicleRepository);
+
+      const vehicle = await repository.create({
+        entity: {
+          brand: 'Toyota',
+          chassis: '123',
+          model: 'Corolla',
+          plate: 'XYZ123',
+          renavam: '5678',
+          year: 2020,
+        },
+      });
+
+      expect(await repository.findById({ id: vehicle.id })).to.be.not.null;
+
+      const response = await request(app.getHttpServer()).delete(
+        `/vehicle/${vehicle.id}`,
+      );
+
+      expect(response.status).to.equal(HttpStatus.OK);
+
+      expect(response.body).to.be.deep.equal({
+        success: true,
+      });
+    });
+
+    it('should return an error when vehicle is not found', async () => {
+      const id = randomUUID();
+
+      const response = await request(app.getHttpServer()).delete(
+        `/vehicle/${id}`,
+      );
+      expect(response.status).to.equal(HttpStatus.NOT_FOUND);
+
+      expect(response.body.message).to.include(
+        ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
+      );
+    });
+  });
 });

@@ -143,7 +143,26 @@ export class VehicleController {
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
   })
-  deleteVehicle(@Param('id') id: UUID) {
-    throw new NotImplementedException('Method not implemented');
+  async deleteVehicle(@Param('id') id: UUID) {
+    try {
+      const result = await this.vehicleRepository.delete({ id });
+
+      return {
+        success: Boolean(result),
+      };
+    } catch (e: unknown) {
+      if (e instanceof AppError) {
+        switch (e.id) {
+          case ErrorCodes.VEHICLE_NOT_FOUND:
+            throw new NotFoundException(e.message, e.stack);
+          default:
+            throw new InternalServerErrorException(e.message, e.stack);
+        }
+      }
+      if (e instanceof Error) {
+        throw new InternalServerErrorException(e.message, e.stack);
+      }
+      throw new InternalServerErrorException(e);
+    }
   }
 }
