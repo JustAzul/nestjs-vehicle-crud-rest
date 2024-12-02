@@ -1,9 +1,10 @@
-import { CreateVehicleDataDto } from './dto/create-vehicle-data.dto';
+import { VehicleData } from './dto/list-vehicle.dto';
 import { Vehicle } from './entities/vehicle.entity';
 
 export class VehicleMapper {
-  static toDTO(entity: Vehicle): CreateVehicleDataDto {
+  static toDTO(entity: Vehicle): VehicleData {
     return {
+      id: entity.id,
       plate: entity.plate,
       chassis: entity.chassis,
       renavam: entity.renavam,
@@ -13,7 +14,7 @@ export class VehicleMapper {
     };
   }
 
-  static toDTOList(entities: Vehicle[]): CreateVehicleDataDto[] {
+  static toDTOList(entities: Vehicle[]): VehicleData[] {
     return entities.map((entity) => this.toDTO(entity));
   }
 }
