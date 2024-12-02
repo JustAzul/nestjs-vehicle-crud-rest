@@ -81,5 +81,3 @@ Execute os testes:
 ```bash
 $ docker compose run app sh -c "npm run test"
 ```
-
----
