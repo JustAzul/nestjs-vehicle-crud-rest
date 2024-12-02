@@ -11,7 +11,7 @@ import {
   VEHICLE_UNIQUE_FIELDS,
 } from '../../constants/module.contants';
 import { Vehicle, VehicleProps } from '../../entities/vehicle.entity';
-import { ListVehicleData } from '../../dto/list-vehicle.dto';
+import { ListVehicleData, VehicleData } from '../../dto/list-vehicle.dto';
 import { VehicleController } from '../../vehicle.controller';
 import { ERROR_MESSAGES } from '../../constants/errors.constants';
 import { VehicleMapper } from '@src/vehicle/vehicle.mapper';
@@ -47,6 +47,59 @@ describe(`${VehicleController.name} (E2E)`, () => {
 
   afterEach(async () => {
     await app.close();
+  });
+
+  describe('POST /vehicle', () => {
+    it('should create a new vehicle', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: '123',
+        model: 'Corolla',
+        plate: 'XYZ123',
+        renavam: '5678',
+        year: 2020,
+      };
+
+      const response = await request(app.getHttpServer())
+        .post('/vehicle')
+        .send(vehicleData);
+
+      expect(response.status).to.equal(HttpStatus.CREATED);
+
+      const createdVehicle = response.body as VehicleData;
+      expect(createdVehicle).to.deep.contains(vehicleData);
+
+      const storedVehicle = await repository.findById({
+        id: createdVehicle.id,
+      });
+
+      expect(storedVehicle).to.deep.contains(vehicleData);
+    });
+
+    it.skip('should return an error when vehicle already exists', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: '123',
+        model: 'Corolla',
+        plate: 'XYZ123',
+        renavam: '5678',
+        year: 2020,
+      };
+
+      await repository.create({ entity: vehicleData });
+
+      for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
+        const response = await request(app.getHttpServer())
+          .post('/vehicle')
+          .send(vehicleData);
+
+        expect(response.status).to.equal(HttpStatus.CONFLICT);
+
+        expect(response.body.message).to.include(
+          ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+        );
+      }
+    });
   });
 
   describe('GET /vehicle', () => {

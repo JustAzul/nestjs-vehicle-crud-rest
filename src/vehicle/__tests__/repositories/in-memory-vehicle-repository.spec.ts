@@ -71,17 +71,19 @@ describe(InMemoryVehicleRepository.name, () => {
 
       await repository.create({ entity: vehicleData });
 
-      try {
-        await repository.create({ entity: vehicleData });
-      } catch (error: unknown) {
-        expect(error).to.be.instanceOf(AppError);
+      for (const uniqueField of VEHICLE_UNIQUE_FIELDS) {
+        try {
+          await repository.create({ entity: vehicleData });
+        } catch (error: unknown) {
+          expect(error).to.be.instanceOf(AppError);
 
-        const appError = error as AppError;
-        expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
+          const appError = error as AppError;
+          expect(appError.id).to.equal(ErrorCodes.DUPLICATE_VEHICLE);
 
-        expect(appError.message).to.contains(
-          ERROR_MESSAGES.DUPLICATE_VEHICLE('chassis'),
-        );
+          expect(appError.message).to.contains(
+            ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+          );
+        }
       }
     });
   });

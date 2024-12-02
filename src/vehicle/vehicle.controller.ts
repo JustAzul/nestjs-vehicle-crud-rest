@@ -13,13 +13,15 @@ import {
   BadRequestException,
   HttpStatus,
   NotImplementedException,
+  UnprocessableEntityException,
+  ConflictException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { CreateVehicleDataDto } from './dto/create-vehicle-data.dto';
 import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
-import { ListVehicleData } from './dto/list-vehicle.dto';
+import { ListVehicleData, VehicleData } from './dto/list-vehicle.dto';
 import { AppError } from '@src/app.error';
 import { ERROR_MESSAGES, ErrorCodes } from './constants/errors.constants';
 import { DEFAULT_PAGE_SIZE } from './constants/module.contants';
@@ -92,7 +94,7 @@ export class VehicleController {
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
   })
-  async getVehicleById(@Param('id') id: UUID) {
+  async getVehicleById(@Param('id') id: UUID): Promise<VehicleData> {
     const vehicle = await this.vehicleRepository.findById({ id });
 
     if (!vehicle) {
@@ -115,8 +117,33 @@ export class VehicleController {
     status: HttpStatus.BAD_REQUEST,
     description: 'Invalid input data.',
   })
-  createVehicle(@Body(ValidationPipe) vehicleData: CreateVehicleDataDto) {
-    throw new NotImplementedException('Method not implemented');
+  @ApiResponse({
+    status: HttpStatus.CONFLICT,
+    description: 'Vehicle already exists.',
+  })
+  async createVehicle(
+    @Body(ValidationPipe) vehicleData: CreateVehicleDataDto,
+  ): Promise<VehicleData> {
+    try {
+      const result = await this.vehicleRepository.create({
+        entity: vehicleData,
+      });
+
+      return VehicleMapper.toDTO(result);
+    } catch (e: unknown) {
+      if (e instanceof AppError) {
+        switch (e.id) {
+          case ErrorCodes.DUPLICATE_VEHICLE:
+            throw new ConflictException(e.message, e.stack);
+          default:
+            throw new InternalServerErrorException(e.message, e.stack);
+        }
+      }
+
+      throw new InternalServerErrorException(
+        e instanceof Error ? e.message : e,
+      );
+    }
   }
 
   @Put(':id')
@@ -164,7 +191,7 @@ export class VehicleController {
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
   })
-  async deleteVehicle(@Param('id') id: UUID) {
+  async deleteVehicle(@Param('id') id: UUID): Promise<{ success: boolean }> {
     try {
       const result = await this.vehicleRepository.delete({ id });
 
