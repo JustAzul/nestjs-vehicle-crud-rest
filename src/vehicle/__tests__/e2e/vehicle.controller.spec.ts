@@ -3,14 +3,14 @@ import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { UUID } from 'crypto';
 import { expect } from 'chai';
-import { InMemoryVehicleRepository } from '../repositories/in-memory.vehicle.repository';
-import { IVehicleRepository } from '../repositories/interfaces/vehicle.repository';
-import { VehicleModule } from '../vehicle.module';
-import { VEHICLE_UNIQUE_FIELDS } from '../constants/module.contants';
-import { Vehicle, VehicleProps } from '../entities/vehicle.entity';
-import { ListVehicleData } from '../dto/list-vehicle.dto';
-import { VehicleController } from '../vehicle.controller';
-import { ERROR_MESSAGES } from '../constants/errors.constants';
+import { InMemoryVehicleRepository } from '../../repositories/in-memory.vehicle.repository';
+import { IVehicleRepository } from '../../repositories/interfaces/vehicle.repository';
+import { VehicleModule } from '../../vehicle.module';
+import { VEHICLE_UNIQUE_FIELDS } from '../../constants/module.contants';
+import { Vehicle, VehicleProps } from '../../entities/vehicle.entity';
+import { ListVehicleData } from '../../dto/list-vehicle.dto';
+import { VehicleController } from '../../vehicle.controller';
+import { ERROR_MESSAGES } from '../../constants/errors.constants';
 
 describe(`${VehicleController.name} (E2E)`, () => {
   let repositorySourceData: Map<UUID, Vehicle>;
