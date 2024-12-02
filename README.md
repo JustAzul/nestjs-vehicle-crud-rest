@@ -4,6 +4,25 @@ Uma API REST CRUD desenvolvida com o [framework NestJS](https://nestjs.com/), pr
 
 ---
 
+## Estrutura do Projeto
+
+```plaintext
+src
+├── vehicle
+│   ├── __tests__            # Testes unitários e de ponta a ponta
+│   ├── dto                  # Data Transfer Objects
+│   ├── entities             # Definição da entidade Veículo
+│   ├── repositories         # Interfaces e implementações do repositório
+│   ├── vehicle.controller.ts # Endpoints da API
+│   ├── vehicle.module.ts    # Módulo Veículo
+│   └── vehicle.mapper.ts    # Utilitário para mapear entidades para DTOs
+├── app.module.ts            # Módulo raiz
+├── app.error.ts             # Tratamento de erros
+└── main.ts                  # Ponto de entrada
+```
+
+---
+
 ## Funcionalidades
 
 - **Operações CRUD**: Gerenciamento completo de veículos com funcionalidades de Criar, Ler, Atualizar e Deletar.
@@ -39,12 +58,6 @@ $ npm install
 
    O servidor estará acessível em: [http://localhost:3000](http://localhost:3000).
 
-2. Executar testes:
-
-   ```bash
-   $ docker compose run app sh -c "npm run test"
-   ```
-
 ---
 
 ## Documentação da API
@@ -70,43 +83,3 @@ $ docker compose run app sh -c "npm run test"
 ```
 
 ---
-
-## Estrutura do Projeto
-
-```plaintext
-src
-├── vehicle
-│   ├── __tests__            # Testes unitários e de ponta a ponta
-│   ├── dto                  # Data Transfer Objects
-│   ├── entities             # Definição da entidade Veículo
-│   ├── repositories         # Interfaces e implementações do repositório
-│   ├── vehicle.controller.ts # Endpoints da API
-│   ├── vehicle.module.ts    # Módulo Veículo
-│   └── vehicle.mapper.ts    # Utilitário para mapear entidades para DTOs
-├── app.module.ts            # Módulo raiz
-├── app.error.ts             # Tratamento de erros
-└── main.ts                  # Ponto de entrada
-```
-
----
-
-## Deploy
-
-1. Construa a imagem Docker:
-
-   ```bash
-   $ docker compose build
-   ```
-
-2. Inicie a aplicação:
-
-   ```bash
-   $ docker compose up
-   ```
-
----
-
-## Autor
-
-- **Diego (Azul) Ferreira**
-- Email: [metalloger@gmail.com](mailto:metalloger@gmail.com)
