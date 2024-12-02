@@ -22,7 +22,7 @@ import { AppError } from '@src/app.error';
 import { ErrorCodes } from './constants/errors.constants';
 import { DEFAULT_PAGE_SIZE } from './constants/module.contants';
 
-@ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
+@ApiTags('vehicles')
 @Controller('vehicle')
 export class VehicleController {
   constructor(private readonly vehicleRepository: IVehicleRepository) {}
