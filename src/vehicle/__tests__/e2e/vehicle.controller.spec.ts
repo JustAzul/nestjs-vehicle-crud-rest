@@ -6,7 +6,10 @@ import { expect } from 'chai';
 import { InMemoryVehicleRepository } from '../../repositories/in-memory.vehicle.repository';
 import { IVehicleRepository } from '../../repositories/interfaces/vehicle.repository';
 import { VehicleModule } from '../../vehicle.module';
-import { VEHICLE_UNIQUE_FIELDS } from '../../constants/module.contants';
+import {
+  DEFAULT_PAGE_SIZE,
+  VEHICLE_UNIQUE_FIELDS,
+} from '../../constants/module.contants';
 import { Vehicle, VehicleProps } from '../../entities/vehicle.entity';
 import { ListVehicleData } from '../../dto/list-vehicle.dto';
 import { VehicleController } from '../../vehicle.controller';
@@ -124,6 +127,30 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(body.metadata).to.be.an('object');
       expect(body.metadata.page).to.equal(String(page));
       expect(body.metadata.totalPages).to.equal(2);
+    });
+
+    it(`should return first page results when no query is provided`, async () => {
+      const itemsPerPage = Math.min(vehicles.length, DEFAULT_PAGE_SIZE);
+      const totalPages = Math.ceil(vehicles.length / DEFAULT_PAGE_SIZE);
+
+      const response = await request(app.getHttpServer())
+        .get('/vehicle')
+        .expect(200);
+
+      const body = response.body as ListVehicleData;
+
+      expect(body.data).to.be.an('array');
+      expect(body.data.length).to.equal(itemsPerPage);
+
+      // @ts-expect-error - data is private
+      expect(body.data.map(({ props }) => props)).to.deep.include.members([
+        vehicles[0],
+        vehicles[1],
+      ]);
+
+      expect(body.metadata).to.be.an('object');
+      expect(body.metadata.page).to.equal(1);
+      expect(body.metadata.totalPages).to.equal(totalPages);
     });
 
     it('should return an error when page or pageSize is invalid', async () => {
