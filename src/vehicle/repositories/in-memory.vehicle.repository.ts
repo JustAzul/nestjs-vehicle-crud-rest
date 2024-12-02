@@ -120,7 +120,17 @@ export class InMemoryVehicleRepository implements IVehicleRepository {
   async delete({
     id,
   }: Parameters<IVehicleRepository[`delete`]>[0]): Promise<boolean> {
-    return this.vehicles.delete(id);
+    const entityExists = this.vehicles.has(id);
+
+    if (entityExists) {
+      const hasDeleted = this.vehicles.delete(id);
+      return hasDeleted;
+    }
+
+    throw new AppError(
+      ErrorCodes.VEHICLE_NOT_FOUND,
+      ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
+    );
   }
 
   private checkDuplicate({

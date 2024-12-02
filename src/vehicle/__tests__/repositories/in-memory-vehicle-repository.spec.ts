@@ -320,28 +320,55 @@ describe(InMemoryVehicleRepository.name, () => {
     });
   });
 
-  it('should delete a vehicle by ID', async () => {
-    const vehicleData: VehicleProps = {
-      brand: 'Toyota',
-      chassis: 'ABC123',
-      model: 'Corolla',
-      plate: 'XYZ1234',
-      renavam: '567890',
-      year: 2020,
-    };
+  describe('deletion behavior', () => {
+    it('should delete a vehicle by ID', async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
 
-    const vehicle = await repository.create({ entity: vehicleData });
-    const deleted = await repository.delete({ id: vehicle.id });
+      const vehicle = await repository.create({ entity: vehicleData });
 
-    expect(deleted).to.be.true;
-    expect(repositorySourceData.has(vehicle.id)).to.be.false;
-  });
+      await repository.delete({ id: vehicle.id });
+      expect(repositorySourceData.has(vehicle.id)).to.be.false;
+    });
 
-  it('should return false when deleting a non-existent vehicle', async () => {
-    const nonExistentId = randomUUID();
-    const deleted = await repository.delete({ id: nonExistentId });
+    it(`should return true when deleting a vehicle`, async () => {
+      const vehicleData: VehicleProps = {
+        brand: 'Toyota',
+        chassis: 'ABC123',
+        model: 'Corolla',
+        plate: 'XYZ1234',
+        renavam: '567890',
+        year: 2020,
+      };
 
-    expect(deleted).to.be.false;
+      const vehicle = await repository.create({ entity: vehicleData });
+      const deleted = await repository.delete({ id: vehicle.id });
+
+      expect(deleted).to.be.true;
+    });
+
+    it('should throw an error when deleting a non-existent vehicle', async () => {
+      const nonExistentId = randomUUID();
+
+      try {
+        await repository.delete({ id: nonExistentId });
+      } catch (error: unknown) {
+        expect(error).to.be.instanceOf(AppError);
+
+        const appError = error as AppError;
+        expect(appError.id).to.equal(ErrorCodes.VEHICLE_NOT_FOUND);
+
+        expect(appError.message).to.contains(
+          ERROR_MESSAGES.VEHICLE_NOT_FOUND(nonExistentId),
+        );
+      }
+    });
   });
 
   it('should return null when finding a vehicle by non-existent ID', async () => {
