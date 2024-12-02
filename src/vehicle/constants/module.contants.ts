@@ -5,3 +5,5 @@ export const VEHICLE_UNIQUE_FIELDS: (keyof Vehicle)[] = [
   'plate',
   'renavam',
 ];
+
+export const DEFAULT_PAGE_SIZE = 10;

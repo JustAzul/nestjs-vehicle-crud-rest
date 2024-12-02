@@ -20,6 +20,7 @@ import { IVehicleRepository } from './repositories/interfaces/vehicle.repository
 import { ListVehicleData } from './dto/list-vehicle.dto';
 import { AppError } from '@src/utils/app.error';
 import { ErrorCodes } from './constants/errors.constants';
+import { DEFAULT_PAGE_SIZE } from './constants/module.contants';
 
 @ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
 @Controller('vehicle')
@@ -39,7 +40,7 @@ export class VehicleController {
   })
   async getAllVehicles(
     @Query('page') page: number = 1,
-    @Query('pageSize') pageSize: number = 10,
+    @Query('pageSize') pageSize: number = DEFAULT_PAGE_SIZE,
   ): Promise<ListVehicleData> {
     try {
       const { data, metadata } = await this.vehicleRepository.findAll({
