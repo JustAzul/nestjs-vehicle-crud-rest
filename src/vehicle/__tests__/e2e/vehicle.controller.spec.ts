@@ -215,7 +215,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
       expect(response.body).to.deep.contains(VehicleMapper.toDTO(vehicle));
     });
 
-    it.skip('should return an error when vehicle is not found', async () => {
+    it('should return an error when vehicle is not found', async () => {
       const id = randomUUID();
 
       const response = await request(app.getHttpServer())
