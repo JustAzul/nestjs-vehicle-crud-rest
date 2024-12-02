@@ -14,7 +14,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
-import { VehicleDataDto } from './dto/vehicle-data.dto';
+import { CreateVehicleDataDto } from './dto/create-vehicle-data.dto';
 import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
@@ -106,7 +106,7 @@ export class VehicleController {
   })
   @ApiResponse({ status: 201, description: 'Vehicle created successfully.' })
   @ApiResponse({ status: 400, description: 'Invalid input data.' })
-  createVehicle(@Body(ValidationPipe) vehicleData: VehicleDataDto) {
+  createVehicle(@Body(ValidationPipe) vehicleData: CreateVehicleDataDto) {
     throw new NotImplementedException('Method not implemented');
   }
 

@@ -8,7 +8,7 @@ import {
   Max,
 } from 'class-validator';
 
-export class VehicleDataDto {
+export class CreateVehicleDataDto {
   @ApiProperty({
     description: 'License plate of the vehicle',
     maxLength: 10,
