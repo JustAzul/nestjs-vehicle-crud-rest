@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication } from '@nestjs/common';
+import { HttpStatus, INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
 import { randomUUID, UUID } from 'crypto';
 import { expect } from 'chai';
@@ -15,6 +15,7 @@ import { ListVehicleData } from '../../dto/list-vehicle.dto';
 import { VehicleController } from '../../vehicle.controller';
 import { ERROR_MESSAGES } from '../../constants/errors.constants';
 import { VehicleMapper } from '@src/vehicle/vehicle.mapper';
+import { STATUS_CODES } from 'http';
 
 describe(`${VehicleController.name} (E2E)`, () => {
   let repositorySourceData: Map<UUID, Vehicle>;
@@ -91,8 +92,9 @@ describe(`${VehicleController.name} (E2E)`, () => {
 
       const response = await request(app.getHttpServer())
         .get('/vehicle')
-        .query({ page, pageSize })
-        .expect(200);
+        .query({ page, pageSize });
+
+      expect(response.status).to.equal(HttpStatus.OK);
 
       const body = response.body as ListVehicleData;
 
@@ -112,8 +114,9 @@ describe(`${VehicleController.name} (E2E)`, () => {
 
       const response = await request(app.getHttpServer())
         .get('/vehicle')
-        .query({ page, pageSize })
-        .expect(200);
+        .query({ page, pageSize });
+
+      expect(response.status).to.equal(HttpStatus.OK);
 
       const body = response.body as ListVehicleData;
 
@@ -131,9 +134,8 @@ describe(`${VehicleController.name} (E2E)`, () => {
       const itemsPerPage = Math.min(vehicles.length, DEFAULT_PAGE_SIZE);
       const totalPages = Math.ceil(vehicles.length / DEFAULT_PAGE_SIZE);
 
-      const response = await request(app.getHttpServer())
-        .get('/vehicle')
-        .expect(200);
+      const response = await request(app.getHttpServer()).get('/vehicle');
+      expect(response.status).to.equal(HttpStatus.OK);
 
       const body = response.body as ListVehicleData;
 
@@ -158,7 +160,7 @@ describe(`${VehicleController.name} (E2E)`, () => {
           .get('/vehicle')
           .query(query);
 
-        expect(response.status).to.equal(400);
+        expect(response.status).to.equal(HttpStatus.BAD_REQUEST);
 
         expect(response.body.message).to.contains(
           ERROR_MESSAGES.INVALID_PAGE_OR_PAGE_SIZE(),
@@ -173,8 +175,9 @@ describe(`${VehicleController.name} (E2E)`, () => {
 
       const response = await request(app.getHttpServer())
         .get('/vehicle')
-        .query({ page, pageSize })
-        .expect(400);
+        .query({ page, pageSize });
+
+      expect(response.status).to.equal(HttpStatus.BAD_REQUEST);
 
       expect(response.body.message).to.include(
         ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage),
@@ -197,19 +200,19 @@ describe(`${VehicleController.name} (E2E)`, () => {
         },
       });
 
-      const response = await request(app.getHttpServer())
-        .get(`/vehicle/${vehicle.id}`)
-        .expect(200);
+      const response = await request(app.getHttpServer()).get(
+        `/vehicle/${vehicle.id}`,
+      );
 
+      expect(response.status).to.equal(HttpStatus.OK);
       expect(response.body).to.deep.contains(VehicleMapper.toDTO(vehicle));
     });
 
     it('should return an error when vehicle is not found', async () => {
       const id = randomUUID();
 
-      const response = await request(app.getHttpServer())
-        .get(`/vehicle/${id}`)
-        .expect(404);
+      const response = await request(app.getHttpServer()).get(`/vehicle/${id}`);
+      expect(response.status).to.equal(HttpStatus.NOT_FOUND);
 
       expect(response.body.message).to.include(
         ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
