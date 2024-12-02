@@ -234,17 +234,19 @@ describe(InMemoryVehicleRepository.name, () => {
     const createdVehicle1 = await repository.create({ entity: vehicle1 });
     const createdVehicle2 = await repository.create({ entity: vehicle2 });
 
-    const field: keyof VehicleProps = 'chassis';
+    const uniqueFields: (keyof Vehicle)[] = VEHICLE_UNIQUE_FIELDS;
 
-    try {
-      await repository.update({
-        id: createdVehicle2.id,
-        updatedData: { chassis: vehicle1[field] },
-      });
-    } catch (error: unknown) {
-      expect((error as Error).message).to.contains(
-        ERROR_MESSAGES.DUPLICATE_VEHICLE(field),
-      );
+    for (const uniqueField of uniqueFields) {
+      try {
+        await repository.update({
+          id: createdVehicle2.id,
+          updatedData: { [uniqueField]: vehicle1[uniqueField] },
+        });
+      } catch (error: unknown) {
+        expect((error as Error).message).to.contains(
+          ERROR_MESSAGES.DUPLICATE_VEHICLE(uniqueField),
+        );
+      }
     }
   });
 
