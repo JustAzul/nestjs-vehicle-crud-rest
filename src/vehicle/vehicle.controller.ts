@@ -18,7 +18,7 @@ import { UpdatedVehicleDataDto } from './dto/update-vehicle-data.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
 import { ListVehicleData } from './dto/list-vehicle.dto';
-import { AppError } from '@src/app.error';
+import { AppError } from '@src/utils/app.error';
 import { ERROR_MESSAGES, ErrorCodes } from './constants/errors.constants';
 
 @ApiTags('vehicles') // Group endpoints under the 'vehicles' tag
