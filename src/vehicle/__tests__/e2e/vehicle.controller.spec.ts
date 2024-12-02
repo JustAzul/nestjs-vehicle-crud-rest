@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { UUID } from 'crypto';
+import { randomUUID, UUID } from 'crypto';
 import { expect } from 'chai';
 import { InMemoryVehicleRepository } from '../../repositories/in-memory.vehicle.repository';
 import { IVehicleRepository } from '../../repositories/interfaces/vehicle.repository';
@@ -14,70 +14,75 @@ import { Vehicle, VehicleProps } from '../../entities/vehicle.entity';
 import { ListVehicleData } from '../../dto/list-vehicle.dto';
 import { VehicleController } from '../../vehicle.controller';
 import { ERROR_MESSAGES } from '../../constants/errors.constants';
+import { VehicleMapper } from '@src/vehicle/vehicle.mapper';
 
 describe(`${VehicleController.name} (E2E)`, () => {
   let repositorySourceData: Map<UUID, Vehicle>;
   let app: INestApplication;
   let repository: IVehicleRepository;
 
-  const vehicles: VehicleProps[] = [
-    {
-      brand: 'Toyota',
-      chassis: '123',
-      model: 'Corolla',
-      plate: 'XYZ123',
-      renavam: '5678',
-      year: 2020,
-    },
-    {
-      brand: 'Honda',
-      chassis: '456',
-      model: 'Civic',
-      plate: 'XYZ456',
-      renavam: '6789',
-      year: 2021,
-    },
-    {
-      brand: 'Ford',
-      chassis: '789',
-      model: 'Focus',
-      plate: 'XYZ789',
-      renavam: '7890',
-      year: 2019,
-    },
-  ];
+  beforeEach(async () => {
+    repositorySourceData = new Map();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [VehicleModule],
+      providers: [
+        {
+          provide: IVehicleRepository,
+          useFactory: () => {
+            return new InMemoryVehicleRepository(
+              repositorySourceData,
+              VEHICLE_UNIQUE_FIELDS,
+            );
+          },
+        },
+      ],
+    }).compile();
+
+    app = moduleFixture.createNestApplication();
+    repository = moduleFixture.get<IVehicleRepository>(IVehicleRepository);
+
+    await app.init();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
 
   describe('GET /vehicle', () => {
+    const vehicles: VehicleProps[] = [
+      {
+        brand: 'Toyota',
+        chassis: '123',
+        model: 'Corolla',
+        plate: 'XYZ123',
+        renavam: '5678',
+        year: 2020,
+      },
+      {
+        brand: 'Honda',
+        chassis: '456',
+        model: 'Civic',
+        plate: 'XYZ456',
+        renavam: '6789',
+        year: 2021,
+      },
+      {
+        brand: 'Ford',
+        chassis: '789',
+        model: 'Focus',
+        plate: 'XYZ789',
+        renavam: '7890',
+        year: 2019,
+      },
+    ];
+
     beforeEach(async () => {
-      repositorySourceData = new Map();
-
-      const moduleFixture: TestingModule = await Test.createTestingModule({
-        imports: [VehicleModule],
-        providers: [
-          {
-            provide: IVehicleRepository,
-            useFactory: () => {
-              return new InMemoryVehicleRepository(
-                repositorySourceData,
-                VEHICLE_UNIQUE_FIELDS,
-              );
-            },
-          },
-        ],
-      }).compile();
-
-      app = moduleFixture.createNestApplication();
-      repository = moduleFixture.get<IVehicleRepository>(IVehicleRepository);
-
-      await app.init();
+      repository = app.get<IVehicleRepository>(IVehicleRepository);
 
       for (const vehicle of vehicles) {
         await repository.create({ entity: vehicle });
       }
-    });
-
-    afterEach(async () => {
-      await app.close();
     });
 
     it('should return the first page of vehicles', async () => {
@@ -184,6 +189,41 @@ describe(`${VehicleController.name} (E2E)`, () => {
 
       expect(response.body.message).to.include(
         ERROR_MESSAGES.PAGE_EXCEEDS_MAX(page, maxPage),
+      );
+    });
+  });
+
+  describe('GET /vehicle/:id', () => {
+    it('should return a vehicle by ID', async () => {
+      repository = app.get<IVehicleRepository>(IVehicleRepository);
+
+      const vehicle = await repository.create({
+        entity: {
+          brand: 'Toyota',
+          chassis: '123',
+          model: 'Corolla',
+          plate: 'XYZ123',
+          renavam: '5678',
+          year: 2020,
+        },
+      });
+
+      const response = await request(app.getHttpServer())
+        .get(`/vehicle/${vehicle.id}`)
+        .expect(200);
+
+      expect(response.body).to.deep.contains(VehicleMapper.toDTO(vehicle));
+    });
+
+    it.skip('should return an error when vehicle is not found', async () => {
+      const id = randomUUID();
+
+      const response = await request(app.getHttpServer())
+        .get(`/vehicle/${id}`)
+        .expect(404);
+
+      expect(response.body.message).to.include(
+        ERROR_MESSAGES.VEHICLE_NOT_FOUND(id),
       );
     });
   });

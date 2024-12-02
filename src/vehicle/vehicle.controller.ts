@@ -11,6 +11,7 @@ import {
   Query,
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { UUID } from 'crypto';
 import { VehicleDataDto } from './dto/vehicle-data.dto';
@@ -19,8 +20,9 @@ import { ApiTags, ApiOperation, ApiResponse, ApiParam } from '@nestjs/swagger';
 import { IVehicleRepository } from './repositories/interfaces/vehicle.repository';
 import { ListVehicleData } from './dto/list-vehicle.dto';
 import { AppError } from '@src/app.error';
-import { ErrorCodes } from './constants/errors.constants';
+import { ERROR_MESSAGES, ErrorCodes } from './constants/errors.constants';
 import { DEFAULT_PAGE_SIZE } from './constants/module.contants';
+import { VehicleMapper } from './vehicle.mapper';
 
 @ApiTags('vehicles')
 @Controller('vehicle')
@@ -86,8 +88,14 @@ export class VehicleController {
     name: 'id',
     description: 'The unique identifier of the vehicle (UUID).',
   })
-  getVehicleById(@Param('id') id: UUID) {
-    throw new NotImplementedException('Method not implemented');
+  async getVehicleById(@Param('id') id: UUID) {
+    const vehicle = await this.vehicleRepository.findById({ id });
+
+    if (!vehicle) {
+      throw new NotFoundException(ERROR_MESSAGES.VEHICLE_NOT_FOUND(id));
+    }
+
+    return VehicleMapper.toDTO(vehicle);
   }
 
   // POST /vehicle - Create a new vehicle
